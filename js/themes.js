@@ -141,7 +141,7 @@ class ThemeManager {
     this.listeners = [];
 
     const saved = this.loadThemeKey();
-    this.currentKey = saved && this.themes[saved] ? saved : "developer";
+    this.currentKey = saved && this.themes[saved] ? saved : "agile";
   }
 
   get() {
