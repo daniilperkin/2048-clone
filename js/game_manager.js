@@ -1,17 +1,23 @@
 /* exported GameManager */
-/* global Grid, Tile */
+/* global Grid, Tile, themeManager */
 class GameManager {
   constructor(size, InputManager, Actuator, StorageManager) {
     this.size = size; // Size of the grid
     this.inputManager = new InputManager();
     this.storageManager = new StorageManager();
-    this.actuator = new Actuator();
+    this.actuator = new Actuator(themeManager);
 
     this.startTiles = 2;
+    this.winThreshold = themeManager.get().winThreshold;
 
     this.inputManager.on("move", this.move.bind(this));
     this.inputManager.on("restart", this.restart.bind(this));
     this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
+
+    themeManager.onChange((theme) => {
+      this.winThreshold = theme.winThreshold;
+      this.actuate();
+    });
 
     this.setup();
   }
@@ -164,7 +170,7 @@ class GameManager {
             this.score += merged.value;
 
             // The mighty 2048 tile
-            if (merged.value === 2048) this.won = true;
+            if (merged.value === this.winThreshold) this.won = true;
           } else {
             this.moveTile(tile, positions.farthest);
           }

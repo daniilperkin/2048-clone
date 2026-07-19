@@ -38,7 +38,12 @@
 
       <div class="above-game">
         <p class="game-intro">Join the numbers and get to the <strong>2048 tile!</strong></p>
-        <a class="restart-button" href="#" role="button" aria-label="Start a new game">New Game</a>
+        <div class="above-game-controls">
+          <select class="theme-select" aria-label="Change tile theme"></select>
+          <a class="restart-button" href="#" role="button" aria-label="Start a new game"
+            >New Game</a
+          >
+        </div>
       </div>
 
       <div class="game-container" role="grid" aria-label="2048 game board">
@@ -118,6 +123,7 @@
       </p>
     </div>
 
+    <script src="js/themes.js"></script>
     <script src="js/keyboard_input_manager.js"></script>
     <script src="js/html_actuator.js"></script>
     <script src="js/grid.js"></script>

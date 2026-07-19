@@ -1,6 +1,7 @@
 /* exported HTMLActuator */
 class HTMLActuator {
-  constructor() {
+  constructor(themeManagerRef) {
+    this.themeManager = themeManagerRef;
     this.tileContainer = document.querySelector(".tile-container");
     this.scoreContainer = document.querySelector(".score-container");
     this.bestContainer = document.querySelector(".best-container");
@@ -49,15 +50,24 @@ class HTMLActuator {
     const position = tile.previousPosition || { x: tile.x, y: tile.y };
     const positionClass = this.positionClass(position);
 
-    // We can't use classlist because it somehow glitches when replacing classes
     const classes = ["tile", `tile-${tile.value}`, positionClass];
-
     if (tile.value > 2048) classes.push("tile-super");
 
     this.applyClasses(wrapper, classes);
 
     inner.classList.add("tile-inner");
-    inner.textContent = tile.value;
+
+    const label = this.themeManager.getLabel(tile.value);
+    const colors = this.themeManager.getColors(tile.value);
+    inner.textContent = label;
+    inner.style.backgroundColor = colors.bg;
+    inner.style.color = colors.fg;
+
+    const themeLabels = this.themeManager.get().labels;
+    const maxDefined = Math.max(...Object.keys(themeLabels).map(Number));
+    if (tile.value > maxDefined) {
+      inner.classList.add("tile-inner-super");
+    }
 
     if (tile.previousPosition) {
       // Make sure that the tile gets rendered in the previous position first

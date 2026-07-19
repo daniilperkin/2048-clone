@@ -514,6 +514,16 @@ hr {
   }
 }
 
+/* Themed tiles: shrink font for longer labels like "Principal", "Deployed" */
+.tile-inner-super {
+  font-size: 24px !important;
+}
+@media screen and (max-width: 520px) {
+  .tile-inner-super {
+    font-size: 11px !important;
+  }
+}
+
 @-webkit-keyframes appear {
   0% {
     opacity: 0;
@@ -656,6 +666,32 @@ hr {
   clear: both;
 }
 
+.above-game-controls {
+  float: right;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.theme-select {
+  display: inline-block;
+  background: #bbada0;
+  border: none;
+  border-radius: 3px;
+  padding: 0 12px;
+  height: 40px;
+  line-height: 42px;
+  color: #f9f6f2;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.theme-select:focus-visible {
+  outline: 3px solid #f67c5f;
+  outline-offset: 2px;
+}
+
 .game-intro {
   float: left;
   line-height: 42px;
@@ -725,6 +761,16 @@ hr {
     display: block;
     box-sizing: border-box;
     margin-top: 2px;
+  }
+
+  .above-game-controls {
+    float: none;
+    justify-content: space-between;
+  }
+
+  .theme-select {
+    font-size: 14px;
+    padding: 0 8px;
   }
 
   .game-container {
