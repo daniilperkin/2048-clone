@@ -93,7 +93,6 @@ ${css}
   <body>
     <div class="container">
       <div class="heading">
-        <h1 class="title">2048</h1>
         <div class="scores-container" role="group" aria-label="Scores">
           <div class="score-container" role="status" aria-label="Current score">0</div>
           <div class="best-container" role="status" aria-label="Best score">0</div>
@@ -101,7 +100,6 @@ ${css}
       </div>
 
       <div class="above-game">
-        <p class="game-intro">Join the numbers and get to the <strong>2048 tile!</strong></p>
         <div class="above-game-controls">
           <select class="theme-select" aria-label="Change tile theme"></select>
           <a class="restart-button" href="#" role="button" aria-label="Start a new game">New Game</a>
@@ -146,10 +144,6 @@ ${css}
 
         <div class="tile-container" aria-hidden="true"></div>
       </div>
-
-      <p class="game-explanation">
-        <strong class="important">How to play:</strong> Use your <strong>arrow keys</strong> to move the tiles. When two tiles with the same number touch, they <strong>merge into one!</strong>
-      </p>
     </div>
 
     <script>
