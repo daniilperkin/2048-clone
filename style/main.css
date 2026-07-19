@@ -106,6 +106,13 @@ a {
   text-decoration: underline;
   cursor: pointer; }
 
+/* Visible keyboard focus for the game's <a role="button"> controls */
+a.restart-button:focus-visible,
+.game-message a:focus-visible {
+  outline: 3px solid #f67c5f;
+  outline-offset: 2px;
+  border-radius: 3px; }
+
 strong.important {
   text-transform: uppercase; }
 

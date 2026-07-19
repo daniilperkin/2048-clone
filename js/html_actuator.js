@@ -107,6 +107,9 @@ class HTMLActuator {
       const addition = document.createElement("div");
       addition.classList.add("score-addition");
       addition.textContent = `+${difference}`;
+      // The animation is decorative; screen readers using role="status"
+      // would otherwise announce "4 plus 2" on every move.
+      addition.setAttribute("aria-hidden", "true");
       this.scoreContainer.appendChild(addition);
     }
   }
@@ -120,7 +123,11 @@ class HTMLActuator {
     const message = won ? "You win!" : "Game over!";
 
     this.messageContainer.classList.add(type);
-    this.messageContainer.getElementsByTagName("p")[0].textContent = message;
+    const messageParagraph = this.messageContainer.getElementsByTagName("p")[0];
+    messageParagraph.textContent = message;
+    // Ensure the live region re-announces even if the message text is
+    // identical to a previous announcement (e.g. game over twice in a row).
+    this.messageContainer.setAttribute("aria-live", "assertive");
   }
 
   clearMessage() {
