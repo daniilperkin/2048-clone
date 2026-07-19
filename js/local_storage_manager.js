@@ -51,11 +51,23 @@ LocalStorageManager.prototype.setBestScore = function (score) {
 // Game state getters/setters and clearing
 LocalStorageManager.prototype.getGameState = function () {
   var stateJSON = this.storage.getItem(this.gameStateKey);
-  return stateJSON ? JSON.parse(stateJSON) : null;
+  if (!stateJSON) return null;
+  try {
+    return JSON.parse(stateJSON);
+  } catch (error) {
+    // Corrupted state — clear it so the game starts fresh instead of crashing
+    this.clearGameState();
+    return null;
+  }
 };
 
 LocalStorageManager.prototype.setGameState = function (gameState) {
-  this.storage.setItem(this.gameStateKey, JSON.stringify(gameState));
+  try {
+    this.storage.setItem(this.gameStateKey, JSON.stringify(gameState));
+  } catch (error) {
+    // Quota exceeded or storage disabled — silently drop the save
+    this.clearGameState();
+  }
 };
 
 LocalStorageManager.prototype.clearGameState = function () {

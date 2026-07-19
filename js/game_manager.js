@@ -22,13 +22,13 @@ GameManager.prototype.restart = function () {
 
 // Keep playing after winning (allows going over 2048)
 GameManager.prototype.keepPlaying = function () {
-  this.keepPlaying = true;
+  this.keepPlayingEnabled = true;
   this.actuator.continueGame(); // Clear the game won/lost message
 };
 
 // Return true if the game is lost, or has won and the user hasn't kept playing
 GameManager.prototype.isGameTerminated = function () {
-  return this.over || (this.won && !this.keepPlaying);
+  return this.over || (this.won && !this.keepPlayingEnabled);
 };
 
 // Set up the game
@@ -42,13 +42,13 @@ GameManager.prototype.setup = function () {
     this.score       = previousState.score;
     this.over        = previousState.over;
     this.won         = previousState.won;
-    this.keepPlaying = previousState.keepPlaying;
+    this.keepPlayingEnabled = previousState.keepPlayingEnabled || previousState.keepPlaying || false;
   } else {
     this.grid        = new Grid(this.size);
     this.score       = 0;
     this.over        = false;
     this.won         = false;
-    this.keepPlaying = false;
+    this.keepPlayingEnabled = false;
 
     // Add the initial tiles
     this.addStartTiles();
@@ -101,11 +101,11 @@ GameManager.prototype.actuate = function () {
 // Represent the current game as an object
 GameManager.prototype.serialize = function () {
   return {
-    grid:        this.grid.serialize(),
-    score:       this.score,
-    over:        this.over,
-    won:         this.won,
-    keepPlaying: this.keepPlaying
+    grid:               this.grid.serialize(),
+    score:              this.score,
+    over:               this.over,
+    won:                this.won,
+    keepPlayingEnabled: this.keepPlayingEnabled
   };
 };
 
