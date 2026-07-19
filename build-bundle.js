@@ -52,7 +52,7 @@ function bundleCss() {
   // Swap Clear Sans for the system font stack.
   css = css.replace(
     /font-family:\s*"Clear Sans",\s*"Helvetica Neue",\s*Arial,\s*sans-serif;/g,
-    'font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;',
+    'font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;'
   );
 
   // Strip every line that declares a vendor-prefixed property,
