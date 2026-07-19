@@ -1,8 +1,9 @@
+/* exported HTMLActuator */
 class HTMLActuator {
   constructor() {
-    this.tileContainer    = document.querySelector(".tile-container");
-    this.scoreContainer   = document.querySelector(".score-container");
-    this.bestContainer    = document.querySelector(".best-container");
+    this.tileContainer = document.querySelector(".tile-container");
+    this.scoreContainer = document.querySelector(".score-container");
+    this.bestContainer = document.querySelector(".best-container");
     this.messageContainer = document.querySelector(".game-message");
 
     this.score = 0;
@@ -43,8 +44,8 @@ class HTMLActuator {
   }
 
   addTile(tile) {
-    const wrapper  = document.createElement("div");
-    const inner    = document.createElement("div");
+    const wrapper = document.createElement("div");
+    const inner = document.createElement("div");
     const position = tile.previousPosition || { x: tile.x, y: tile.y };
     const positionClass = this.positionClass(position);
 
@@ -119,7 +120,7 @@ class HTMLActuator {
   }
 
   message(won) {
-    const type    = won ? "game-won" : "game-over";
+    const type = won ? "game-won" : "game-over";
     const message = won ? "You win!" : "Game over!";
 
     this.messageContainer.classList.add(type);

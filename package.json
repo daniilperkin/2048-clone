@@ -1,0 +1,22 @@
+{
+  "name": "2048-mine",
+  "version": "1.0.0",
+  "description": "A small clone of 1024, based on Saming's 2048 (also a clone).",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "serve . -l 8080",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "serve": "^14.2.4"
+  }
+}

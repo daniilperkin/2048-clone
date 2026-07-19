@@ -1,3 +1,5 @@
+/* exported Grid */
+/* global Tile */
 class Grid {
   constructor(size, previousState) {
     this.size = size;
@@ -8,7 +10,7 @@ class Grid {
   empty() {
     const cells = [];
     for (let x = 0; x < this.size; x++) {
-      const row = cells[x] = [];
+      const row = (cells[x] = []);
       for (let y = 0; y < this.size; y++) {
         row.push(null);
       }
@@ -19,7 +21,7 @@ class Grid {
   fromState(state) {
     const cells = [];
     for (let x = 0; x < this.size; x++) {
-      const row = cells[x] = [];
+      const row = (cells[x] = []);
       for (let y = 0; y < this.size; y++) {
         const tile = state[x][y];
         row.push(tile ? new Tile(tile.position, tile.value) : null);
@@ -84,14 +86,13 @@ class Grid {
   }
 
   withinBounds(position) {
-    return position.x >= 0 && position.x < this.size &&
-           position.y >= 0 && position.y < this.size;
+    return position.x >= 0 && position.x < this.size && position.y >= 0 && position.y < this.size;
   }
 
   serialize() {
     const cellState = [];
     for (let x = 0; x < this.size; x++) {
-      const row = cellState[x] = [];
+      const row = (cellState[x] = []);
       for (let y = 0; y < this.size; y++) {
         row.push(this.cells[x][y] ? this.cells[x][y].serialize() : null);
       }

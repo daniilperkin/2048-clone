@@ -1,10 +1,11 @@
+/* exported KeyboardInputManager */
 class KeyboardInputManager {
   constructor() {
     this.events = {};
 
     this.eventTouchstart = "touchstart";
-    this.eventTouchmove  = "touchmove";
-    this.eventTouchend   = "touchend";
+    this.eventTouchmove = "touchmove";
+    this.eventTouchend = "touchend";
 
     this.listen();
   }
@@ -27,17 +28,32 @@ class KeyboardInputManager {
     // Map KeyboardEvent.key values to game directions:
     // 0: up, 1: right, 2: down, 3: left
     const keyMap = {
-      ArrowUp: 0,    ArrowRight: 1, ArrowDown: 2,  ArrowLeft: 3,
-      k: 0,          l: 1,          j: 2,          h: 3,        // Vim keys
-      K: 0,          L: 1,          J: 2,          H: 3,
-      w: 0,          d: 1,          s: 2,          a: 3,        // WASD
-      W: 0,          D: 1,          S: 2,          A: 3
+      ArrowUp: 0,
+      ArrowRight: 1,
+      ArrowDown: 2,
+      ArrowLeft: 3,
+      k: 0,
+      l: 1,
+      j: 2,
+      h: 3, // Vim keys
+      K: 0,
+      L: 1,
+      J: 2,
+      H: 3,
+      w: 0,
+      d: 1,
+      s: 2,
+      a: 3, // WASD
+      W: 0,
+      D: 1,
+      S: 2,
+      A: 3,
     };
 
     // Respond to direction keys
     document.addEventListener("keydown", (event) => {
       const modifiers = event.altKey || event.ctrlKey || event.metaKey || event.shiftKey;
-      const mapped    = keyMap[event.key];
+      const mapped = keyMap[event.key];
 
       if (!modifiers) {
         if (mapped !== undefined) {
@@ -96,7 +112,7 @@ class KeyboardInputManager {
 
       if (Math.max(absDx, absDy) > 10) {
         // (right : left) : (down : up)
-        this.emit("move", absDx > absDy ? (dx > 0 ? 1 : 3) : (dy > 0 ? 2 : 0));
+        this.emit("move", absDx > absDy ? (dx > 0 ? 1 : 3) : dy > 0 ? 2 : 0);
       }
     });
   }

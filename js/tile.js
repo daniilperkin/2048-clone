@@ -1,3 +1,4 @@
+/* exported Tile */
 class Tile {
   constructor(position, value) {
     this.x = position.x;
@@ -20,7 +21,7 @@ class Tile {
   serialize() {
     return {
       position: { x: this.x, y: this.y },
-      value: this.value
+      value: this.value,
     };
   }
 }

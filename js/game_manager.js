@@ -1,9 +1,11 @@
+/* exported GameManager */
+/* global Grid, Tile */
 class GameManager {
   constructor(size, InputManager, Actuator, StorageManager) {
-    this.size           = size; // Size of the grid
-    this.inputManager   = new InputManager();
+    this.size = size; // Size of the grid
+    this.inputManager = new InputManager();
     this.storageManager = new StorageManager();
-    this.actuator       = new Actuator();
+    this.actuator = new Actuator();
 
     this.startTiles = 2;
 
@@ -38,16 +40,17 @@ class GameManager {
 
     // Reload the game from a previous game if present
     if (previousState) {
-      this.grid        = new Grid(previousState.grid.size, previousState.grid.cells);
-      this.score       = previousState.score;
-      this.over        = previousState.over;
-      this.won         = previousState.won;
-      this.keepPlayingEnabled = previousState.keepPlayingEnabled || previousState.keepPlaying || false;
+      this.grid = new Grid(previousState.grid.size, previousState.grid.cells);
+      this.score = previousState.score;
+      this.over = previousState.over;
+      this.won = previousState.won;
+      this.keepPlayingEnabled =
+        previousState.keepPlayingEnabled || previousState.keepPlaying || false;
     } else {
-      this.grid        = new Grid(this.size);
-      this.score       = 0;
-      this.over        = false;
-      this.won         = false;
+      this.grid = new Grid(this.size);
+      this.score = 0;
+      this.over = false;
+      this.won = false;
       this.keepPlayingEnabled = false;
 
       // Add the initial tiles
@@ -88,22 +91,22 @@ class GameManager {
     }
 
     this.actuator.actuate(this.grid, {
-      score:      this.score,
-      over:       this.over,
-      won:        this.won,
-      bestScore:  this.storageManager.getBestScore(),
-      terminated: this.isGameTerminated()
+      score: this.score,
+      over: this.over,
+      won: this.won,
+      bestScore: this.storageManager.getBestScore(),
+      terminated: this.isGameTerminated(),
     });
   }
 
   // Represent the current game as an object
   serialize() {
     return {
-      grid:               this.grid.serialize(),
-      score:              this.score,
-      over:               this.over,
-      won:                this.won,
-      keepPlayingEnabled: this.keepPlayingEnabled
+      grid: this.grid.serialize(),
+      score: this.score,
+      over: this.over,
+      won: this.won,
+      keepPlayingEnabled: this.keepPlayingEnabled,
     };
   }
 
@@ -129,9 +132,9 @@ class GameManager {
     // 0: up, 1: right, 2: down, 3: left
     if (this.isGameTerminated()) return; // Don't do anything if the game's over
 
-    const vector     = this.getVector(direction);
+    const vector = this.getVector(direction);
     const traversals = this.buildTraversals(vector);
-    let   moved      = false;
+    let moved = false;
 
     // Save the current tile positions and remove merger information
     this.prepareTiles();
@@ -144,7 +147,7 @@ class GameManager {
 
         if (tile) {
           const positions = this.findFarthestPosition(cell, vector);
-          const next      = this.grid.cellContent(positions.next);
+          const next = this.grid.cellContent(positions.next);
 
           // Only one merger per row traversal?
           if (next && next.value === tile.value && !next.mergedFrom) {
@@ -188,10 +191,10 @@ class GameManager {
   getVector(direction) {
     // Vectors representing tile movement
     const map = {
-      0: { x: 0,  y: -1 }, // Up
-      1: { x: 1,  y: 0 },  // Right
-      2: { x: 0,  y: 1 },  // Down
-      3: { x: -1, y: 0 }   // Left
+      0: { x: 0, y: -1 }, // Up
+      1: { x: 1, y: 0 }, // Right
+      2: { x: 0, y: 1 }, // Down
+      3: { x: -1, y: 0 }, // Left
     };
     return map[direction];
   }
@@ -218,13 +221,12 @@ class GameManager {
     // Progress towards the vector direction until an obstacle is found
     do {
       previous = current;
-      current  = { x: previous.x + vector.x, y: previous.y + vector.y };
-    } while (this.grid.withinBounds(current) &&
-             this.grid.cellAvailable(current));
+      current = { x: previous.x + vector.x, y: previous.y + vector.y };
+    } while (this.grid.withinBounds(current) && this.grid.cellAvailable(current));
 
     return {
       farthest: previous,
-      next: current // Used to check if a merge is required
+      next: current, // Used to check if a merge is required
     };
   }
 
@@ -241,8 +243,8 @@ class GameManager {
         if (tile) {
           for (let direction = 0; direction < 4; direction++) {
             const vector = this.getVector(direction);
-            const cell   = { x: x + vector.x, y: y + vector.y };
-            const other  = this.grid.cellContent(cell);
+            const cell = { x: x + vector.x, y: y + vector.y };
+            const other = this.grid.cellContent(cell);
 
             if (other && other.value === tile.value) {
               return true; // These two tiles can be merged

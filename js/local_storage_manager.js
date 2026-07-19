@@ -15,9 +15,10 @@ window.fakeStorage = {
 
   clear() {
     return (this._data = {});
-  }
+  },
 };
 
+/* exported LocalStorageManager */
 class LocalStorageManager {
   constructor() {
     this.bestScoreKey = "bestScore";
