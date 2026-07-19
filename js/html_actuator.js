@@ -62,12 +62,7 @@ class HTMLActuator {
     inner.textContent = label;
     inner.style.backgroundColor = colors.bg;
     inner.style.color = colors.fg;
-
-    const themeLabels = this.themeManager.get().labels;
-    const maxDefined = Math.max(...Object.keys(themeLabels).map(Number));
-    if (tile.value > maxDefined) {
-      inner.classList.add("tile-inner-super");
-    }
+    inner.style.setProperty("--tile-font-size", `${this.fontSizeForLabel(label)}px`);
 
     if (tile.previousPosition) {
       // Make sure that the tile gets rendered in the previous position first
@@ -95,6 +90,24 @@ class HTMLActuator {
 
   applyClasses(element, classes) {
     element.setAttribute("class", classes.join(" "));
+  }
+
+  /**
+   * Pick a font size (in px) that fits the tile width based on label length.
+   * Desktop tiles are 107px wide; these sizes are tuned so the longest
+   * labels ("Principal", "Deployed", "Principal II") still fit on one line.
+   * Mobile scales them down to ~55% via the CSS media query.
+   */
+  fontSizeForLabel(label) {
+    const len = label.length;
+    if (len <= 2) return 55; // "2", "64", "Mid", "PR", "13", "21"
+    if (len <= 3) return 45; // "128", "256", "512"
+    if (len <= 4) return 35; // "1024", "2048"
+    if (len <= 5) return 28; // "Staff"
+    if (len <= 6) return 24; // "Intern", "Junior", "Senior", "Review", "Merged"
+    if (len <= 7) return 20; // "Backlog"
+    if (len <= 9) return 18; // "Principal", "Approved", "Deployed"
+    return 15; // "Principal II", "Principal III"
   }
 
   normalizePosition(position) {
