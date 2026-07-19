@@ -24,36 +24,35 @@ class KeyboardInputManager {
   }
 
   listen() {
-    const map = {
-      38: 0, // Up
-      39: 1, // Right
-      40: 2, // Down
-      37: 3, // Left
-      75: 0, // Vim up
-      76: 1, // Vim right
-      74: 2, // Vim down
-      72: 3, // Vim left
-      87: 0, // W
-      68: 1, // D
-      83: 2, // S
-      65: 3  // A
+    // Map KeyboardEvent.key values to game directions:
+    // 0: up, 1: right, 2: down, 3: left
+    const keyMap = {
+      ArrowUp: 0,    ArrowRight: 1, ArrowDown: 2,  ArrowLeft: 3,
+      k: 0,          l: 1,          j: 2,          h: 3,        // Vim keys
+      K: 0,          L: 1,          J: 2,          H: 3,
+      w: 0,          d: 1,          s: 2,          a: 3,        // WASD
+      W: 0,          D: 1,          S: 2,          A: 3
     };
 
     // Respond to direction keys
     document.addEventListener("keydown", (event) => {
       const modifiers = event.altKey || event.ctrlKey || event.metaKey || event.shiftKey;
-      const mapped    = map[event.which];
+      const mapped    = keyMap[event.key];
 
       if (!modifiers) {
         if (mapped !== undefined) {
           event.preventDefault();
+          // Ignore auto-repeat key events so holding an arrow doesn't
+          // fire a move on every OS key-repeat tick (which would make
+          // the game race forward uncontrollably).
+          if (event.repeat) return;
           this.emit("move", mapped);
         }
-      }
 
-      // R key restarts the game
-      if (!modifiers && event.which === 82) {
-        this.restart(event);
+        // R key restarts the game (also ignore repeats here)
+        if ((event.key === "r" || event.key === "R") && !event.repeat) {
+          this.restart(event);
+        }
       }
     });
 
