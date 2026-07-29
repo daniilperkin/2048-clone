@@ -129,7 +129,25 @@ class KeyboardInputManager {
 
   bindButtonPress(selector, fn) {
     const button = document.querySelector(selector);
-    button.addEventListener("click", fn.bind(this));
-    button.addEventListener(this.eventTouchend, fn.bind(this));
+
+    // On touch devices both 'touchend' and 'click' fire (~300ms apart).
+    // Use a flag to prevent the handler from executing twice for a
+    // single user interaction.
+    let handled = false;
+
+    button.addEventListener("touchend", (event) => {
+      handled = true;
+      fn.call(this, event);
+      // Reset the flag after the click window has passed so the next
+      // interaction (mouse or touch) starts clean.
+      setTimeout(() => {
+        handled = false;
+      }, 350);
+    });
+
+    button.addEventListener("click", (event) => {
+      if (handled) return;
+      fn.call(this, event);
+    });
   }
 }
