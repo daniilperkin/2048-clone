@@ -1,3 +1,6 @@
 .sass-cache/
 node_modules/
 npm-debug.log*
+
+# Generated single-file bundle (regenerate with: node build-bundle.js)
+2048.html

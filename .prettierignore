@@ -5,3 +5,6 @@ style/fonts/
 *.png
 *.woff
 *.eot
+
+# Generated single-file bundle
+2048.html
