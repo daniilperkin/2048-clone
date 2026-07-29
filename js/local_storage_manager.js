@@ -21,8 +21,8 @@ window.fakeStorage = {
 /* exported LocalStorageManager */
 class LocalStorageManager {
   constructor() {
-    this.bestScoreKey = "bestScore";
-    this.gameStateKey = "gameState";
+    this.bestScoreKey = "2048-best-score";
+    this.gameStateKey = "2048-game-state";
 
     const supported = this.localStorageSupported();
     this.storage = supported ? window.localStorage : window.fakeStorage;

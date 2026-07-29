@@ -39,10 +39,10 @@ describe("LocalStorageManager", () => {
     });
 
     it("clears corrupted state and returns null", () => {
-      localStorage.setItem("gameState", "{invalid json}}}");
+      localStorage.setItem("2048-game-state", "{invalid json}}}");
       expect(manager.getGameState()).toBeNull();
       // State should be cleared after corruption
-      expect(localStorage.getItem("gameState")).toBeNull();
+      expect(localStorage.getItem("2048-game-state")).toBeNull();
     });
 
     it("clearGameState removes stored state", () => {
