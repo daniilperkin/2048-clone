@@ -12,11 +12,15 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "@eslint/js": "^9.18.0",
-    "eslint": "^9.18.0",
-    "eslint-config-prettier": "^10.0.1",
-    "globals": "^15.14.0",
-    "prettier": "^3.4.2",
-    "serve": "^14.2.4"
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.8.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.8.0",
+    "prettier": "^3.9.6",
+    "serve": "^14.2.6"
+  },
+  "overrides": {
+    "brace-expansion": "^5.0.8",
+    "minimatch": "^10.2.6"
   }
 }
