@@ -8,16 +8,25 @@ Please follow the house rules to have a bigger chance of your contribution being
 
 ### How to make changes
 
-- To make changes, create a new branch based on `master` (do not create one from `gh-pages` unless strictly necessary) and make them there, then create a Pull Request to master.  
-  `gh-pages` is different from master in that it contains sharing features, analytics and other things that have no direct bearing with the game. `master` is the "pure" version of the game.
-- If you want to modify the CSS, please edit the SCSS files present in `style/`: `main.scss` and others. Don't edit the `main.css`, because it's supposed to be generated.  
-  In order to compile your SCSS modifications, you need to use the `sass` gem (install it by running `gem install sass` once Ruby is installed).  
-  To run SASS, simply use the following command:  
-  `sass --unix-newlines --watch style/main.scss`  
-  SASS will automatically recompile your css when changed.
-- `Rakefile` contains some tasks that help during development. Feel free to add useful tasks if needed.
-- Please use 2-space indentation when editing the JavaScript. A `.jshintrc` file is present, which will help your code to follow the guidelines if you install and run `jshint`.
+- Create a new branch based on `main` and make your changes there, then open a Pull Request back to `main`.
+- If you want to modify the CSS, edit `style/main.css` directly. This file is hand-maintained (flexbox layout, system fonts). The `style/main.scss` and `style/helpers.scss` files are vestigial remnants from the upstream project and are no longer compiled.
+- To generate the single-file bundle (`2048.html`), run `node build-bundle.js`. This inlines all JS and CSS into a standalone HTML file. The bundle is **not** tracked in git — regenerate it at deploy time.
+- Please use 2-space indentation when editing the JavaScript.
+- Linting and formatting are enforced via **ESLint 10** (flat config) and **Prettier 3**. Run `npm run lint` and `npm run format:check` before submitting.
+- Unit tests use **Vitest + jsdom**. Run `npm test` to verify your changes.
 - Please test your modification thoroughly before submitting your Pull Request.
+
+### Pre-commit checklist
+
+```bash
+npm install
+npm run lint
+npm run format:check
+npm test
+node build-bundle.js
+```
+
+All of the above must pass cleanly before a PR will be merged.
 
 ### Changes that might not be accepted
 
@@ -34,4 +43,5 @@ We have to be conservative with the core game. This means that some modification
 - Bug fixes
 - Compatibility improvements
 - "Under the hood" enhancements
+- New theme definitions (see `js/themes.js`)
 - Small changes that don't have an impact on the core gameplay

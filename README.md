@@ -1,42 +1,104 @@
-# 2048
+# 2048-mine
 
-A small clone of [1024](https://play.google.com/store/apps/details?id=com.veewo.a1024), based on [Saming's 2048](http://saming.fr/p/2048/) (also a clone). 2048 was indirectly inspired by [Threes](https://asherv.com/threes/).
+A modernized fork of [2048](https://github.com/gabrielecirulli/2048), originally based on [1024](https://play.google.com/store/apps/details?id=com.veewo.a1024) and [Saming's 2048](http://saming.fr/p/2048/), indirectly inspired by [Threes](https://asherv.com/threes/).
 
-Made just for fun. [Play it here!](http://gabrielecirulli.github.io/2048/)
+## What's different
 
-The official app can also be found on the [Play Store](https://play.google.com/store/apps/details?id=com.gabrielecirulli.app2048) and [App Store!](https://itunes.apple.com/us/app/2048-by-gabriele-cirulli/id868076805)
+This fork modernizes the original game with:
 
-### Contributions
+- **ES6+ code** — classes, `const`/`let`, arrow functions, template literals
+- **Theme system** — four built-in themes (Classic, Developer, Agile, Fibonacci) with custom tile labels, colors, and win thresholds. Themes are selectable at runtime and persisted to `localStorage`.
+- **Accessibility** — ARIA grid roles, `aria-live` for game messages, `:focus-visible` styles
+- **Single-file bundling** — `node build-bundle.js` produces a standalone `2048.html` with all JS and CSS inlined, for embedding as an easter egg in other projects
+- **ESLint 10 + Prettier 3** — modern flat config linting and formatting
+- **Vitest test suite** — 44 unit tests covering core game logic (Tile, Grid, ThemeManager, LocalStorageManager)
+- **Namespaced localStorage** — keys are prefixed with `2048-` to avoid collisions on host pages
 
-[Anna Harren](https://github.com/iirelu/) and [sigod](https://github.com/sigod) are maintainers for this repository.
+## Playing
 
-Other notable contributors:
+```bash
+npm install
+npm start
+```
 
-- [TimPetricola](https://github.com/TimPetricola) added best score storage
-- [chrisprice](https://github.com/chrisprice) added custom code for swipe handling on mobile
-- [marcingajda](https://github.com/marcingajda) made swipes work on Windows Phone
-- [mgarciaisaia](https://github.com/mgarciaisaia) added support for Android 2.3
+Then open http://localhost:8080 in your browser.
 
-Many thanks to [rayhaanj](https://github.com/rayhaanj), [Mechazawa](https://github.com/Mechazawa), [grant](https://github.com/grant), [remram44](https://github.com/remram44) and [ghoullier](https://github.com/ghoullier) for the many other good contributions.
+### Controls
 
-### Screenshot
+- **Arrow keys** / **WASD** / **Vim keys (hjkl)** — move tiles
+- **R** — restart the game
+- **Touch swipes** — move tiles on mobile devices
 
-<p align="center">
-  <img src="https://cloud.githubusercontent.com/assets/1175750/8614312/280e5dc2-26f1-11e5-9f1f-5891c3ca8b26.png" alt="Screenshot"/>
-</p>
+### Themes
 
-That screenshot is fake, by the way. I never reached 2048 :smile:
+Use the theme selector at the top of the page. Each theme has unique tile labels and a different win threshold:
 
-## Contributing
+| Theme     | Win Threshold | Tile Labels                           |
+| --------- | ------------- | ------------------------------------- |
+| Classic   | 2048          | Numbers (2, 4, 8, … 2048)             |
+| Developer | 64            | Intern → Junior → … → Principal       |
+| Agile     | 128           | Backlog → Ticket → … → Deployed       |
+| Fibonacci | 128           | Fibonacci sequence (1, 2, 3, 5, … 21) |
 
-Changes and improvements are more than welcome! Feel free to fork and open a pull request. Please make your changes in a specific branch and request to pull into `master`! If you can, please make sure the game fully works before sending the PR, as that will help speed up the process.
+Tiles past the last defined label get a roman-numeral suffix (e.g. "Deployed ii", "Deployed iii").
 
-You can find the same information in the [contributing guide.](https://github.com/gabrielecirulli/2048/blob/master/CONTRIBUTING.md)
+## Building the single-file bundle
+
+```bash
+node build-bundle.js
+```
+
+This produces `2048.html` — a standalone file with all JavaScript and CSS inlined. The file is gitignored and should be regenerated at deploy time.
+
+## Development
+
+### Prerequisites
+
+- Node.js (LTS recommended)
+- npm
+
+### Setup
+
+```bash
+npm install
+```
+
+### Available scripts
+
+| Script                 | Description                           |
+| ---------------------- | ------------------------------------- |
+| `npm start`            | Start a local dev server on port 8080 |
+| `npm run lint`         | Run ESLint                            |
+| `npm run lint:fix`     | Run ESLint with auto-fix              |
+| `npm run format`       | Format all files with Prettier        |
+| `npm run format:check` | Check formatting without writing      |
+| `npm test`             | Run the Vitest test suite             |
+| `node build-bundle.js` | Generate the single-file `2048.html`  |
+
+### Project structure
+
+```
+2048-mine/
+├── index.html              # Dev entry — loads 8 separate <script> tags
+├── build-bundle.js         # Single-file bundler (inlines JS + CSS)
+├── js/                     # Game source (plain scripts, shared global scope)
+│   ├── themes.js           # ThemeManager + 4 theme definitions
+│   ├── keyboard_input_manager.js
+│   ├── grid.js             # Grid model
+│   ├── tile.js             # Tile value object
+│   ├── local_storage_manager.js
+│   ├── html_actuator.js    # DOM renderer
+│   ├── game_manager.js     # Controller: move/merge/win/lose logic
+│   └── application.js      # Bootstrap
+├── style/                  # main.css (hand-maintained) + vestigial .scss
+├── test/                   # Vitest + jsdom test suite
+└── .github/workflows/ci.yml
+```
+
+## Credits
+
+Original game by [Gabriele Cirulli](https://github.com/gabrielecirulli). See the upstream [repository](https://github.com/gabrielecirulli/2048) for the full contributor list.
 
 ## License
 
-2048 is licensed under the [MIT license.](https://github.com/gabrielecirulli/2048/blob/master/LICENSE.txt)
-
-## Donations
-
-I made this in my spare time, and it's hosted on GitHub (which means I don't have any hosting costs), but if you enjoyed the game and feel like buying me coffee, you can donate at my BTC address: `1Ec6onfsQmoP9kkL3zkpB6c5sA4PVcXU2i`. Thank you very much!
+MIT — see [LICENSE.txt](LICENSE.txt).
