@@ -46,12 +46,23 @@ class GameManager {
 
     // Reload the game from a previous game if present
     if (previousState) {
-      this.grid = new Grid(previousState.grid.size, previousState.grid.cells);
-      this.score = previousState.score;
-      this.over = previousState.over;
-      this.won = previousState.won;
-      this.keepPlayingEnabled =
-        previousState.keepPlayingEnabled || previousState.keepPlaying || false;
+      try {
+        this.grid = new Grid(previousState.grid.size, previousState.grid.cells);
+        this.score = previousState.score;
+        this.over = previousState.over;
+        this.won = previousState.won;
+        this.keepPlayingEnabled =
+          previousState.keepPlayingEnabled || previousState.keepPlaying || false;
+      } catch (_e) {
+        // Malformed persisted state — start a fresh game instead of crashing
+        this.storageManager.clearGameState();
+        this.grid = new Grid(this.size);
+        this.score = 0;
+        this.over = false;
+        this.won = false;
+        this.keepPlayingEnabled = false;
+        this.addStartTiles();
+      }
     } else {
       this.grid = new Grid(this.size);
       this.score = 0;
