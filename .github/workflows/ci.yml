@@ -33,6 +33,9 @@ jobs:
       - name: Check Prettier formatting
         run: npm run format:check
 
+      - name: Run tests
+        run: npm test
+
   syntax:
     name: JS Syntax Check
     runs-on: ubuntu-latest

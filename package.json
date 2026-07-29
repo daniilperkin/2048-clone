@@ -9,15 +9,18 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.8.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.8.0",
+    "jsdom": "^29.1.1",
     "prettier": "^3.9.6",
-    "serve": "^14.2.6"
+    "serve": "^14.2.6",
+    "vitest": "^4.1.10"
   },
   "overrides": {
     "brace-expansion": "^5.0.8",

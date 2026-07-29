@@ -26,11 +26,39 @@ export default [
   {
     // The flat config file itself uses ESM import/export and must be
     // parsed as a module. Listed AFTER the general block so it wins.
-    files: ["eslint.config.js", "build-bundle.js"],
+    files: ["eslint.config.js", "build-bundle.js", "vitest.config.js"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
       globals: { ...globals.node },
+    },
+  },
+  {
+    // Test files use ESM import/export plus vitest globals and the
+    // game classes loaded at runtime via eval (not importable).
+    files: ["test/**/*.js"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: {
+        ...globals.node,
+        // Vitest globals
+        describe: "readonly",
+        it: "readonly",
+        test: "readonly",
+        expect: "readonly",
+        beforeEach: "readonly",
+        afterEach: "readonly",
+        beforeAll: "readonly",
+        afterAll: "readonly",
+        vi: "readonly",
+        // Game classes loaded via eval in setup.js
+        Tile: "readonly",
+        Grid: "readonly",
+        LocalStorageManager: "readonly",
+        ThemeManager: "readonly",
+        themeManager: "readonly",
+      },
     },
   },
 ];
