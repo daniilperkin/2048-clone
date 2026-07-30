@@ -4,3 +4,10 @@ npm-debug.log*
 
 # Generated single-file bundle (regenerate with: node build-bundle.js)
 2048.html
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
