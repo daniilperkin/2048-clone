@@ -20,10 +20,12 @@ describe("LocalStorageManager", () => {
       expect(manager.getBestScore()).toBe(0);
     });
 
-    it("stores and retrieves best score (as string per localStorage API)", () => {
+    it("stores and retrieves best score (coerced to a number)", () => {
       manager.setBestScore(12345);
-      // localStorage.setItem coerces to string; getBestScore returns the raw string
-      expect(manager.getBestScore()).toBe("12345");
+      // localStorage.setItem coerces to string; getBestScore coerces
+      // back to a number so callers always get a consistent numeric type.
+      expect(manager.getBestScore()).toBe(12345);
+      expect(typeof manager.getBestScore()).toBe("number");
     });
   });
 
@@ -64,7 +66,7 @@ describe("LocalStorageManager", () => {
 
       const m = new LocalStorageManager();
       m.setBestScore(999);
-      expect(m.getBestScore()).toBe("999");
+      expect(m.getBestScore()).toBe(999);
 
       // Restore
       Object.defineProperty(window, "localStorage", {

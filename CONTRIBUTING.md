@@ -9,7 +9,7 @@ Please follow the house rules to have a bigger chance of your contribution being
 ### How to make changes
 
 - Create a new branch based on `main` and make your changes there, then open a Pull Request back to `main`.
-- If you want to modify the CSS, edit `style/main.css` directly. This file is hand-maintained (flexbox layout, system fonts). The `style/main.scss` and `style/helpers.scss` files are vestigial remnants from the upstream project and are no longer compiled.
+- If you want to modify the CSS, edit `style/main.css` directly. This file is hand-maintained (flexbox layout, system fonts).
 - To generate the single-file bundle (`2048.html`), run `node build-bundle.js`. This inlines all JS and CSS into a standalone HTML file. The bundle is **not** tracked in git — regenerate it at deploy time.
 - Please use 2-space indentation when editing the JavaScript.
 - Linting and formatting are enforced via **ESLint 10** (flat config) and **Prettier 3**. Run `npm run lint` and `npm run format:check` before submitting.

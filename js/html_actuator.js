@@ -51,7 +51,6 @@ class HTMLActuator {
     const positionClass = this.positionClass(position);
 
     const classes = ["tile", `tile-${tile.value}`, positionClass];
-    if (tile.value > 2048) classes.push("tile-super");
 
     this.applyClasses(wrapper, classes);
 
@@ -110,12 +109,14 @@ class HTMLActuator {
     return 15; // "Principal II", "Principal III"
   }
 
-  normalizePosition(position) {
+  // Convert 0-indexed {x,y} to the 1-indexed form used in CSS class
+  // names (.tile-position-1-1, .tile-position-1-2, ...).
+  to1Indexed(position) {
     return { x: position.x + 1, y: position.y + 1 };
   }
 
   positionClass(position) {
-    const normalized = this.normalizePosition(position);
+    const normalized = this.to1Indexed(position);
     return `tile-position-${normalized.x}-${normalized.y}`;
   }
 

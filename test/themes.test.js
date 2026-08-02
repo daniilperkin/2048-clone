@@ -121,4 +121,40 @@ describe("ThemeManager", () => {
       expect(tm.themes.developer.winThreshold).toBe(64);
     });
   });
+
+  describe("WCAG contrast (tile text on background)", () => {
+    // Relative luminance per WCAG 2.1. Convert #rrggbb to L.
+    function luminance(hex) {
+      const r = parseInt(hex.slice(1, 3), 16) / 255;
+      const g = parseInt(hex.slice(3, 5), 16) / 255;
+      const b = parseInt(hex.slice(5, 7), 16) / 255;
+      const toLinear = (c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+      return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+    }
+
+    function contrastRatio(fg, bg) {
+      const l1 = luminance(fg);
+      const l2 = luminance(bg);
+      const lighter = Math.max(l1, l2);
+      const darker = Math.min(l1, l2);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    // Tile text is large and bold, so WCAG AA requires >= 3:1.
+    // Developer and Agile themes previously used white on -400 shades
+    // (~2.3:1); this guards against regressions in those themes.
+    it("developer and agile tiles meet WCAG AA large-text contrast (3:1)", () => {
+      const themes = ["developer", "agile"];
+      for (const key of themes) {
+        const theme = tm.themes[key];
+        for (const { fg, bg } of Object.values(theme.colors)) {
+          const ratio = contrastRatio(fg, bg);
+          expect(ratio).toBeGreaterThanOrEqual(3);
+        }
+        // superColor too
+        const superRatio = contrastRatio(theme.superColor.fg, theme.superColor.bg);
+        expect(superRatio).toBeGreaterThanOrEqual(3);
+      }
+    });
+  });
 });

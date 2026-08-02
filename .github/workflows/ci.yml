@@ -36,6 +36,9 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Build single-file bundle
+        run: npm run build
+
   syntax:
     name: JS Syntax Check
     runs-on: ubuntu-latest

@@ -10,10 +10,27 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const GAME_FILES = ["js/tile.js", "js/grid.js", "js/local_storage_manager.js", "js/themes.js"];
+const GAME_FILES = [
+  "js/directions.js",
+  "js/tile.js",
+  "js/grid.js",
+  "js/local_storage_manager.js",
+  "js/themes.js",
+  "js/keyboard_input_manager.js",
+  "js/game_manager.js",
+];
 
 // Class names that should be globally accessible after loading
-const GLOBAL_CLASSES = ["Tile", "Grid", "LocalStorageManager", "ThemeManager", "themeManager"];
+const GLOBAL_CLASSES = [
+  "DIRECTIONS",
+  "Tile",
+  "Grid",
+  "LocalStorageManager",
+  "ThemeManager",
+  "themeManager",
+  "KeyboardInputManager",
+  "GameManager",
+];
 
 let loaded = false;
 

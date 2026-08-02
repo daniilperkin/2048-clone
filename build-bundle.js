@@ -18,10 +18,11 @@ const ROOT = path.dirname(fileURLToPath(import.meta.url));
 
 // Load order matters: each file's classes are referenced by later files.
 const JS_FILES = [
+  "js/directions.js",
   "js/themes.js",
   "js/keyboard_input_manager.js",
-  "js/grid.js",
   "js/tile.js",
+  "js/grid.js",
   "js/local_storage_manager.js",
   "js/html_actuator.js",
   "js/game_manager.js",
@@ -48,12 +49,6 @@ function bundleCss() {
 
   // Drop the @import for the Clear Sans webfont — we use system fonts.
   css = css.replace(/@import\s+url\([^)]+\);\s*/g, "");
-
-  // Swap Clear Sans for the system font stack.
-  css = css.replace(
-    /font-family:\s*"Clear Sans",\s*"Helvetica Neue",\s*Arial,\s*sans-serif;/g,
-    'font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;'
-  );
 
   // Strip every line that declares a vendor-prefixed property,
   // keeping only the standard property that follows it.
@@ -91,6 +86,12 @@ ${css}
     </style>
   </head>
   <body>
+    <noscript>
+      <p style="text-align: center; margin: 2em; font-family: system-ui, sans-serif">
+        2048 requires JavaScript to run. Please enable JavaScript in your browser
+        settings to play.
+      </p>
+    </noscript>
     <div class="container">
       <div class="heading">
         <div class="scores-container" role="group" aria-label="Scores">

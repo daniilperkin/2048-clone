@@ -1,4 +1,5 @@
 /* exported KeyboardInputManager */
+/* global DIRECTIONS */
 class KeyboardInputManager {
   constructor() {
     this.events = {};
@@ -25,29 +26,29 @@ class KeyboardInputManager {
   }
 
   listen() {
-    // Map KeyboardEvent.key values to game directions:
-    // 0: up, 1: right, 2: down, 3: left
+    // Map KeyboardEvent.key values to game directions using the shared
+    // DIRECTIONS contract (see js/directions.js).
     const keyMap = {
-      ArrowUp: 0,
-      ArrowRight: 1,
-      ArrowDown: 2,
-      ArrowLeft: 3,
-      k: 0,
-      l: 1,
-      j: 2,
-      h: 3, // Vim keys
-      K: 0,
-      L: 1,
-      J: 2,
-      H: 3,
-      w: 0,
-      d: 1,
-      s: 2,
-      a: 3, // WASD
-      W: 0,
-      D: 1,
-      S: 2,
-      A: 3,
+      ArrowUp: DIRECTIONS.UP,
+      ArrowRight: DIRECTIONS.RIGHT,
+      ArrowDown: DIRECTIONS.DOWN,
+      ArrowLeft: DIRECTIONS.LEFT,
+      k: DIRECTIONS.UP,
+      l: DIRECTIONS.RIGHT,
+      j: DIRECTIONS.DOWN,
+      h: DIRECTIONS.LEFT, // Vim keys
+      K: DIRECTIONS.UP,
+      L: DIRECTIONS.RIGHT,
+      J: DIRECTIONS.DOWN,
+      H: DIRECTIONS.LEFT,
+      w: DIRECTIONS.UP,
+      d: DIRECTIONS.RIGHT,
+      s: DIRECTIONS.DOWN,
+      a: DIRECTIONS.LEFT, // WASD
+      W: DIRECTIONS.UP,
+      D: DIRECTIONS.RIGHT,
+      S: DIRECTIONS.DOWN,
+      A: DIRECTIONS.LEFT,
     };
 
     // Respond to direction keys
@@ -55,7 +56,14 @@ class KeyboardInputManager {
       const modifiers = event.altKey || event.ctrlKey || event.metaKey || event.shiftKey;
       const mapped = keyMap[event.key];
 
-      if (!modifiers) {
+      // Don't intercept arrow keys while the theme <select> (or any
+      // form control) has focus — the user is navigating the dropdown,
+      // not playing the game.
+      const inFormControl =
+        document.activeElement &&
+        ["SELECT", "INPUT", "TEXTAREA"].includes(document.activeElement.tagName);
+
+      if (!modifiers && !inFormControl) {
         if (mapped !== undefined) {
           event.preventDefault();
           // Ignore auto-repeat key events so holding an arrow doesn't
@@ -110,9 +118,18 @@ class KeyboardInputManager {
       const dy = touchEndClientY - touchStartClientY;
       const absDy = Math.abs(dy);
 
-      if (Math.max(absDx, absDy) > 10) {
+      if (Math.max(absDx, absDy) > 30) {
         // (right : left) : (down : up)
-        this.emit("move", absDx > absDy ? (dx > 0 ? 1 : 3) : dy > 0 ? 2 : 0);
+        this.emit(
+          "move",
+          absDx > absDy
+            ? dx > 0
+              ? DIRECTIONS.RIGHT
+              : DIRECTIONS.LEFT
+            : dy > 0
+              ? DIRECTIONS.DOWN
+              : DIRECTIONS.UP
+        );
       }
     });
   }

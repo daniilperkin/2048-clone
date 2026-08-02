@@ -77,9 +77,9 @@ const THEMES = {
     colors: {
       2: { bg: "#dbeafe", fg: "#1e3a8a" },
       4: { bg: "#93c5fd", fg: "#1e3a8a" },
-      8: { bg: "#60a5fa", fg: "#ffffff" },
-      16: { bg: "#818cf8", fg: "#ffffff" },
-      32: { bg: "#a78bfa", fg: "#ffffff" },
+      8: { bg: "#60a5fa", fg: "#1e3a8a" },
+      16: { bg: "#818cf8", fg: "#312e81" },
+      32: { bg: "#a78bfa", fg: "#4c1d95" },
       64: { bg: "#fbbf24", fg: "#78350f" },
     },
     superColor: { bg: "#1e1b4b", fg: "#fbbf24" },
@@ -100,8 +100,8 @@ const THEMES = {
     colors: {
       2: { bg: "#e5e7eb", fg: "#374151" },
       4: { bg: "#93c5fd", fg: "#1e3a8a" },
-      8: { bg: "#818cf8", fg: "#ffffff" },
-      16: { bg: "#c084fc", fg: "#ffffff" },
+      8: { bg: "#818cf8", fg: "#312e81" },
+      16: { bg: "#c084fc", fg: "#581c87" },
       32: { bg: "#86efac", fg: "#14532d" },
       64: { bg: "#5eead4", fg: "#134e4a" },
       128: { bg: "#fbbf24", fg: "#78350f" },
@@ -142,6 +142,7 @@ class ThemeManager {
 
     const saved = this.loadThemeKey();
     this.currentKey = saved && this.themes[saved] ? saved : "agile";
+    this.applyThemeToBody();
   }
 
   get() {
@@ -156,7 +157,17 @@ class ThemeManager {
     if (!this.themes[key]) return;
     this.currentKey = key;
     this.saveThemeKey(key);
+    this.applyThemeToBody();
     this.listeners.forEach((fn) => fn(this.get()));
+  }
+
+  // Mirror the active theme onto <body data-theme="..."> so CSS can
+  // scope theme-specific decorations (e.g., the classic-tile glow)
+  // without JS having to inline every decorative property.
+  applyThemeToBody() {
+    if (typeof document !== "undefined" && document.body) {
+      document.body.dataset.theme = this.currentKey;
+    }
   }
 
   onChange(fn) {

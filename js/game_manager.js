@@ -1,5 +1,5 @@
 /* exported GameManager */
-/* global Grid, Tile, themeManager */
+/* global Grid, Tile, themeManager, DIRECTIONS */
 class GameManager {
   constructor(size, InputManager, Actuator, StorageManager) {
     this.size = size; // Size of the grid
@@ -16,6 +16,14 @@ class GameManager {
 
     themeManager.onChange((theme) => {
       this.winThreshold = theme.winThreshold;
+      // Recompute the won state against the new threshold so the win
+      // overlay doesn't linger (or fail to appear) after a theme
+      // switch. If the player already chose to keep playing, preserve
+      // the existing won flag — the overlay is gated by
+      // keepPlayingEnabled in that case.
+      if (!this.keepPlayingEnabled) {
+        this.won = this.hasWinningTile();
+      }
       this.actuate();
     });
 
@@ -32,7 +40,12 @@ class GameManager {
   // Keep playing after winning (allows going over 2048)
   keepPlaying() {
     this.keepPlayingEnabled = true;
-    this.actuator.continueGame(); // Clear the game won/lost message
+    // Persist the new state so the win overlay doesn't reappear on
+    // refresh before the next move. actuate() serializes (with
+    // keepPlayingEnabled now true) and re-renders; continueGame()
+    // clears the overlay immediately.
+    this.actuate();
+    this.actuator.continueGame();
   }
 
   // Return true if the game is lost, or has won and the user hasn't kept playing
@@ -206,12 +219,13 @@ class GameManager {
 
   // Get the vector representing the chosen direction
   getVector(direction) {
-    // Vectors representing tile movement
+    // Vectors representing tile movement, keyed by the shared
+    // DIRECTIONS contract (see js/directions.js).
     const map = {
-      0: { x: 0, y: -1 }, // Up
-      1: { x: 1, y: 0 }, // Right
-      2: { x: 0, y: 1 }, // Down
-      3: { x: -1, y: 0 }, // Left
+      [DIRECTIONS.UP]: { x: 0, y: -1 },
+      [DIRECTIONS.RIGHT]: { x: 1, y: 0 },
+      [DIRECTIONS.DOWN]: { x: 0, y: 1 },
+      [DIRECTIONS.LEFT]: { x: -1, y: 0 },
     };
     return map[direction];
   }
@@ -249,6 +263,16 @@ class GameManager {
 
   movesAvailable() {
     return this.grid.cellsAvailable() || this.tileMatchesAvailable();
+  }
+
+  // Check whether any tile on the board meets the current winThreshold.
+  // Used to recompute this.won after a theme switch changes the threshold.
+  hasWinningTile() {
+    let hasWin = false;
+    this.grid.eachCell((_x, _y, tile) => {
+      if (tile && tile.value >= this.winThreshold) hasWin = true;
+    });
+    return hasWin;
   }
 
   // Check for available matches between tiles (more expensive check)

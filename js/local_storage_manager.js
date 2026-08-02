@@ -1,4 +1,7 @@
-window.fakeStorage = {
+// In-memory fallback used when window.localStorage is unavailable
+// (e.g., Safari private mode or quota-exceeded). Declared with
+// `const` so it doesn't leak onto `window` as a global property.
+const fakeStorage = {
   _data: {},
 
   setItem(id, val) {
@@ -25,7 +28,7 @@ class LocalStorageManager {
     this.gameStateKey = "2048-game-state";
 
     const supported = this.localStorageSupported();
-    this.storage = supported ? window.localStorage : window.fakeStorage;
+    this.storage = supported ? window.localStorage : fakeStorage;
   }
 
   localStorageSupported() {
@@ -42,7 +45,9 @@ class LocalStorageManager {
 
   // Best score getters/setters
   getBestScore() {
-    return this.storage.getItem(this.bestScoreKey) || 0;
+    // localStorage (and fakeStorage) return strings or null; coerce to
+    // a number so callers always get a consistent numeric type.
+    return Number(this.storage.getItem(this.bestScoreKey)) || 0;
   }
 
   setBestScore(score) {

@@ -11,7 +11,7 @@ This fork modernizes the original game with:
 - **Accessibility** — ARIA grid roles, `aria-live` for game messages, `:focus-visible` styles
 - **Single-file bundling** — `node build-bundle.js` produces a standalone `2048.html` with all JS and CSS inlined, for embedding as an easter egg in other projects
 - **ESLint 10 + Prettier 3** — modern flat config linting and formatting
-- **Vitest test suite** — 44 unit tests covering core game logic (Tile, Grid, ThemeManager, LocalStorageManager)
+- **Vitest test suite** — 78 unit tests covering core game logic (Tile, Grid, ThemeManager, LocalStorageManager, GameManager)
 - **Namespaced localStorage** — keys are prefixed with `2048-` to avoid collisions on host pages
 
 ## Playing
@@ -68,12 +68,12 @@ npm install
 | Script                 | Description                           |
 | ---------------------- | ------------------------------------- |
 | `npm start`            | Start a local dev server on port 8080 |
+| `npm run build`        | Generate the single-file `2048.html`  |
 | `npm run lint`         | Run ESLint                            |
 | `npm run lint:fix`     | Run ESLint with auto-fix              |
 | `npm run format`       | Format all files with Prettier        |
 | `npm run format:check` | Check formatting without writing      |
 | `npm test`             | Run the Vitest test suite             |
-| `node build-bundle.js` | Generate the single-file `2048.html`  |
 
 ### Project structure
 
@@ -82,6 +82,7 @@ npm install
 ├── index.html              # Dev entry — loads 8 separate <script> tags
 ├── build-bundle.js         # Single-file bundler (inlines JS + CSS)
 ├── js/                     # Game source (plain scripts, shared global scope)
+│   ├── directions.js       # Shared direction contract (UP/RIGHT/DOWN/LEFT)
 │   ├── themes.js           # ThemeManager + 4 theme definitions
 │   ├── keyboard_input_manager.js
 │   ├── grid.js             # Grid model
@@ -90,7 +91,7 @@ npm install
 │   ├── html_actuator.js    # DOM renderer
 │   ├── game_manager.js     # Controller: move/merge/win/lose logic
 │   └── application.js      # Bootstrap
-├── style/                  # main.css (hand-maintained) + vestigial .scss
+├── style/                  # main.css (hand-maintained)
 ├── test/                   # Vitest + jsdom test suite
 └── .github/workflows/ci.yml
 ```

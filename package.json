@@ -1,11 +1,12 @@
 {
   "name": "2048-mine",
   "version": "1.0.0",
-  "description": "A small clone of 1024, based on Saming's 2048 (also a clone).",
+  "description": "A modernized 2048 fork with theme system, accessibility, single-file bundling, ESLint 10 + Prettier 3, and a Vitest suite.",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "serve . -l 8080",
+    "build": "node build-bundle.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -21,6 +22,9 @@
     "prettier": "^3.9.6",
     "serve": "^14.2.6",
     "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "overrides": {
     "brace-expansion": "^5.0.8",
