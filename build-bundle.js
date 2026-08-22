@@ -143,7 +143,7 @@ ${css}
           </div>
         </div>
 
-        <div class="tile-container" aria-hidden="true"></div>
+        <div class="tile-container"></div>
       </div>
     </div>
 

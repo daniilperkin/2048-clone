@@ -63,6 +63,12 @@ class HTMLActuator {
     inner.style.color = colors.fg;
     inner.style.setProperty("--tile-font-size", `${this.fontSizeForLabel(label)}px`);
 
+    // Expose the tile to assistive tech: the board container is not
+    // aria-hidden, so each tile announces its value and grid position
+    // (e.g. "8, row 2 column 3") instead of being invisible silence.
+    wrapper.setAttribute("role", "gridcell");
+    wrapper.setAttribute("aria-label", `${label}, row ${position.y + 1} column ${position.x + 1}`);
+
     if (tile.previousPosition) {
       // Make sure that the tile gets rendered in the previous position first
       window.requestAnimationFrame(() => {
