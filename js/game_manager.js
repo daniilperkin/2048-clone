@@ -193,8 +193,10 @@ class GameManager {
             // Update the score
             this.score += merged.value;
 
-            // The mighty 2048 tile
-            if (merged.value === this.winThreshold) this.won = true;
+            // Reaching or exceeding the theme's win threshold wins the
+            // game. `>=` keeps custom themes with non-power-of-2 thresholds
+            // winnable (a merge can jump past, e.g. Fibonacci 144 -> 233).
+            if (merged.value >= this.winThreshold) this.won = true;
           } else {
             this.moveTile(tile, positions.farthest);
           }
