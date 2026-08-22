@@ -18,6 +18,7 @@ const GAME_FILES = [
   "js/themes.js",
   "js/keyboard_input_manager.js",
   "js/game_manager.js",
+  "js/html_actuator.js",
 ];
 
 // Class names that should be globally accessible after loading
@@ -30,6 +31,7 @@ const GLOBAL_CLASSES = [
   "themeManager",
   "KeyboardInputManager",
   "GameManager",
+  "HTMLActuator",
 ];
 
 let loaded = false;

@@ -60,6 +60,7 @@ export default [
         themeManager: "readonly",
         KeyboardInputManager: "readonly",
         GameManager: "readonly",
+        HTMLActuator: "readonly",
         DIRECTIONS: "readonly",
       },
     },
