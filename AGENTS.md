@@ -4,36 +4,12 @@ Modernized, single-page 2048 game fork with theme switcher, accessibility (WCAG 
 
 ## Tech Stack & Architecture
 
-- **Runtime**: Vanilla JavaScript (ES Modules, Node 20+)
+- **Runtime**: Vanilla JavaScript (plain `<script>` tags, shared global scope — no ES modules; Node 20+ for tooling)
 - **Testing**: Vitest (`vitest run`)
 - **Linting & Formatting**: ESLint 10 (`eslint .`), Prettier 3 (`prettier --check .`)
 - **Bundler**: `build-bundle.js` (inlines all CSS, JS, and assets into standalone `2048.html`)
 
-## Directory Layout
-
-```
-2048-mine/
-├── js/               # Game logic (game_manager.js, grid.js, tile.js, keyboard_input_manager.js, html_actuator.js)
-├── style/            # CSS styling and color palettes
-├── test/             # Vitest test suite
-├── index.html        # Development entrypoint
-├── 2048.html         # Self-contained bundled single-file build
-├── build-bundle.js   # Single-file HTML bundler script
-└── package.json
-```
-
-## Commands
-
-| Purpose | Command |
-|---|---|
-| Run tests | `npm test` |
-| Lint code | `npm run lint` |
-| Format check | `npm run format:check` |
-| Build standalone single-file | `npm run build` |
-| Local preview | `npm start` (serves at `http://localhost:8080`) |
-
-## Development Rules
-
-1. Keep game logic decoupled from DOM manipulation (`HTMLActuator`).
-2. Run `npm test` and `npm run lint` before committing any changes.
-3. After changing styles or JS, run `npm run build` to update the standalone `2048.html` bundle.
+The game files intentionally avoid ESM imports: `index.html` loads them via
+`<script>` tags in dependency order, they communicate through a shared global
+scope, and `test/setup.js` replicates that by evaluating the sources. Do not
+"modernize" to ES modules without reworking all three of those pieces together.
