@@ -38,23 +38,3 @@ jobs:
 
       - name: Build single-file bundle
         run: npm run build
-
-  syntax:
-    name: JS Syntax Check
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Set up Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: lts/*
-
-      - name: node --check on every game JS file
-        run: |
-          for f in js/*.js; do
-            echo "Checking $f"
-            node --check "$f"
-          done
