@@ -11,7 +11,7 @@ This fork modernizes the original game with:
 - **Accessibility** — ARIA grid roles, `aria-live` for game messages, `:focus-visible` styles
 - **Single-file bundling** — `node build-bundle.js` produces a standalone `2048.html` with all JS and CSS inlined, for embedding as an easter egg in other projects
 - **ESLint 10 + Prettier 3** — modern flat config linting and formatting
-- **Vitest test suite** — 78 unit tests covering core game logic (Tile, Grid, ThemeManager, LocalStorageManager, GameManager)
+- **Vitest test suite** — 105 unit tests covering core game logic (Tile, Grid, ThemeManager, LocalStorageManager, KeyboardInputManager, GameManager, HTMLActuator)
 - **Namespaced localStorage** — keys are prefixed with `2048-` to avoid collisions on host pages
 
 ## Playing
