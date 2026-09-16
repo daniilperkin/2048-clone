@@ -101,7 +101,7 @@ describe("ThemeManager", () => {
 
   describe("theme definitions", () => {
     it("all themes have name, winThreshold, labels, colors, and superColor", () => {
-      const themes = ["classic", "developer", "agile", "fibonacci"];
+      const themes = ["classic", "developer", "agile", "fibonacci", "doodle"];
       for (const key of themes) {
         const theme = tm.themes[key];
         expect(theme.name).toBeTruthy();
@@ -119,6 +119,18 @@ describe("ThemeManager", () => {
 
     it("developer theme has winThreshold of 64", () => {
       expect(tm.themes.developer.winThreshold).toBe(64);
+    });
+
+    it("doodle theme is a full theme with paper-and-ink labels", () => {
+      expect(tm.themes.doodle.name).toBe("Doodle");
+      expect(tm.themes.doodle.winThreshold).toBe(2048);
+      tm.set("doodle");
+      expect(tm.getLabel(2)).toBe("2");
+      expect(tm.getLabel(2048)).toBe("2048");
+      // Overflow keeps the roman-numeral suffix behaviour.
+      expect(tm.getLabel(4096)).toBe("2048 ii");
+      expect(tm.getColors(2048).bg).toBe("#2c1f07");
+      expect(tm.getColors(4096)).toBe(tm.get().superColor);
     });
   });
 
@@ -155,6 +167,21 @@ describe("ThemeManager", () => {
         const superRatio = contrastRatio(theme.superColor.fg, theme.superColor.bg);
         expect(superRatio).toBeGreaterThanOrEqual(3);
       }
+    });
+
+    // The doodle theme is held to the stricter body-text threshold: its
+    // numerals are set in a hand-writing face that is harder to read than
+    // the geometric faces the other themes use.
+    it("doodle tiles meet WCAG AA body-text contrast (4.5:1)", () => {
+      const theme = tm.themes.doodle;
+      for (const [value, { fg, bg }] of Object.entries(theme.colors)) {
+        const ratio = contrastRatio(fg, bg);
+        expect(ratio, `doodle tile ${value} is only ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(
+          4.5
+        );
+      }
+      const superRatio = contrastRatio(theme.superColor.fg, theme.superColor.bg);
+      expect(superRatio).toBeGreaterThanOrEqual(4.5);
     });
   });
 });

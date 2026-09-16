@@ -13,3 +13,7 @@ The game files intentionally avoid ESM imports: `index.html` loads them via
 `<script>` tags in dependency order, they communicate through a shared global
 scope, and `test/setup.js` replicates that by evaluating the sources. Do not
 "modernize" to ES modules without reworking all three of those pieces together.
+
+Adding a game script means registering it in **three** places, in matching order:
+`index.html`, `JS_FILES` in `build-bundle.js`, and `GAME_FILES` in `test/setup.js`
+(plus `GLOBAL_CLASSES` there if tests need to reach its class or instance).

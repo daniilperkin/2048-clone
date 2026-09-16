@@ -132,6 +132,44 @@ const THEMES = {
     },
     superColor: { bg: "#3c3a32", fg: "#f9f6f2" },
   },
+
+  /**
+   * "Paper & Ink" — a hand-drawn skin. Tile colours here must stay in
+   * sync with tools/tile-art.config.mjs, which the build-time tile
+   * generator reads to draw one sketch per value; test/doodle-tiles.test.js
+   * fails if the two drift apart. Every pair clears WCAG AA (>= 4.5:1).
+   */
+  doodle: {
+    name: "Doodle",
+    winThreshold: 2048,
+    labels: {
+      2: "2",
+      4: "4",
+      8: "8",
+      16: "16",
+      32: "32",
+      64: "64",
+      128: "128",
+      256: "256",
+      512: "512",
+      1024: "1024",
+      2048: "2048",
+    },
+    colors: {
+      2: { bg: "#f4efe4", fg: "#3b352c" },
+      4: { bg: "#efe7d6", fg: "#3b352c" },
+      8: { bg: "#e3d7bd", fg: "#332e26" },
+      16: { bg: "#d9c9a6", fg: "#2f2a22" },
+      32: { bg: "#cdb789", fg: "#2b2620" },
+      64: { bg: "#bfa06a", fg: "#241f19" },
+      128: { bg: "#6b4f17", fg: "#faf6ee" },
+      256: { bg: "#5a4112", fg: "#f9f4ea" },
+      512: { bg: "#4a350d", fg: "#f7f1e6" },
+      1024: { bg: "#3b2a0a", fg: "#f5efe3" },
+      2048: { bg: "#2c1f07", fg: "#f3ecdd" },
+    },
+    superColor: { bg: "#231806", fg: "#f0e7d5" },
+  },
 };
 
 class ThemeManager {

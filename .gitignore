@@ -5,6 +5,9 @@ npm-debug.log*
 # Generated single-file bundle (regenerate with: node build-bundle.js)
 2048.html
 
+# Build-time tile art (regenerate with: node tools/generate-tiles.mjs)
+build/
+
 # OS / IDE
 .DS_Store
 Thumbs.db

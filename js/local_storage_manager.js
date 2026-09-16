@@ -26,6 +26,7 @@ class LocalStorageManager {
   constructor() {
     this.bestScoreKey = "2048-best-score";
     this.gameStateKey = "2048-game-state";
+    this.soundKey = "2048-sound";
 
     const supported = this.localStorageSupported();
     this.storage = supported ? window.localStorage : fakeStorage;
@@ -78,5 +79,15 @@ class LocalStorageManager {
 
   clearGameState() {
     this.storage.removeItem(this.gameStateKey);
+  }
+
+  // Sound preference. Off by default: an absent key reads as disabled, so
+  // the game is silent until the player opts in.
+  getSoundEnabled() {
+    return this.storage.getItem(this.soundKey) === "1";
+  }
+
+  setSoundEnabled(enabled) {
+    this.storage.setItem(this.soundKey, enabled ? "1" : "0");
   }
 }
