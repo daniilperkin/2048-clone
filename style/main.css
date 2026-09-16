@@ -637,6 +637,41 @@ body[data-theme="classic"] .tile.tile-2048 .tile-inner {
   text-align: center;
 }
 
+/* Sound toggle: a fixed-width icon button that sits between the theme
+ * picker and New Game. The slash and the waves swap on aria-pressed so
+ * the control's state is visible, not just announced. */
+.sound-toggle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  background: #8f7a66;
+  color: #f9f6f2;
+  cursor: pointer;
+}
+.sound-toggle:focus-visible {
+  outline: 3px solid #f67c5f;
+  outline-offset: 2px;
+}
+.sound-toggle .sound-waves,
+.sound-toggle .sound-slash {
+  transition: opacity 120ms ease-in-out;
+}
+.sound-toggle .sound-waves {
+  opacity: 0;
+}
+.sound-toggle[aria-pressed="true"] .sound-waves {
+  opacity: 1;
+}
+.sound-toggle[aria-pressed="true"] .sound-slash {
+  opacity: 0;
+}
+
 @media screen and (max-width: 540px) {
   html,
   body {
@@ -925,6 +960,167 @@ body[data-theme="classic"] .tile.tile-2048 .tile-inner {
   .game-container .game-message {
     -webkit-animation: none;
     -moz-animation: none;
+    animation: none;
+  }
+}
+
+/* ─── Doodle theme ("Paper & Ink") ───────────────────────────────
+ * A hand-drawn skin. Tile art is generated at build time by
+ * tools/generate-tiles.mjs — one deterministic sketch per value — and
+ * inlined as data URIs by build-bundle.js, so the shipped single file
+ * still makes zero network requests.
+ *
+ * Scoped to <body data-theme="doodle"> exactly like the classic
+ * decoration above, so none of it bleeds onto the other themes.
+ *
+ * The hand-written numerals come from a system-font stack (no webfont
+ * is bundled) — the theme costs bytes only for the tile art.
+ */
+body[data-theme="doodle"] {
+  color: #3b352c;
+}
+
+body[data-theme="doodle"] .game-container {
+  background: #e8e0cf;
+  border-radius: 8px;
+}
+
+body[data-theme="doodle"] .grid-cell {
+  background: rgba(90, 74, 48, 0.1);
+  border-radius: 6px;
+}
+
+body[data-theme="doodle"] .tile .tile-inner {
+  font-family: "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive, system-ui;
+  font-weight: 700;
+  border-radius: 6px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+}
+
+/* One sketch per tile value. Past 2048 the board falls back to the
+ * theme's superColor with no art, which is deliberate: those tiles are
+ * already rare enough to read as a different material. */
+body[data-theme="doodle"] .tile.tile-2 .tile-inner {
+  background-image: url("../build/tiles/tile-2.svg");
+  transform: rotate(-0.6deg);
+}
+body[data-theme="doodle"] .tile.tile-4 .tile-inner {
+  background-image: url("../build/tiles/tile-4.svg");
+  transform: rotate(0.5deg);
+}
+body[data-theme="doodle"] .tile.tile-8 .tile-inner {
+  background-image: url("../build/tiles/tile-8.svg");
+  transform: rotate(-0.4deg);
+}
+body[data-theme="doodle"] .tile.tile-16 .tile-inner {
+  background-image: url("../build/tiles/tile-16.svg");
+  transform: rotate(0.7deg);
+}
+body[data-theme="doodle"] .tile.tile-32 .tile-inner {
+  background-image: url("../build/tiles/tile-32.svg");
+  transform: rotate(-0.5deg);
+}
+body[data-theme="doodle"] .tile.tile-64 .tile-inner {
+  background-image: url("../build/tiles/tile-64.svg");
+  transform: rotate(0.4deg);
+}
+body[data-theme="doodle"] .tile.tile-128 .tile-inner {
+  background-image: url("../build/tiles/tile-128.svg");
+  transform: rotate(-0.7deg);
+}
+body[data-theme="doodle"] .tile.tile-256 .tile-inner {
+  background-image: url("../build/tiles/tile-256.svg");
+  transform: rotate(0.6deg);
+}
+body[data-theme="doodle"] .tile.tile-512 .tile-inner {
+  background-image: url("../build/tiles/tile-512.svg");
+  transform: rotate(-0.45deg);
+}
+body[data-theme="doodle"] .tile.tile-1024 .tile-inner {
+  background-image: url("../build/tiles/tile-1024.svg");
+  transform: rotate(0.55deg);
+}
+body[data-theme="doodle"] .tile.tile-2048 .tile-inner {
+  background-image: url("../build/tiles/tile-2048.svg");
+  transform: rotate(-0.3deg);
+}
+body[data-theme="doodle"] .tile.tile-4096 .tile-inner {
+  background-image: url("../build/tiles/tile-4096.svg");
+  transform: rotate(0.35deg);
+}
+
+/* Chrome around the board, in the same paper-and-ink material. */
+body[data-theme="doodle"] .score-container,
+body[data-theme="doodle"] .best-container {
+  background: #e8e0cf;
+  color: #3b352c;
+  border-radius: 4px;
+}
+body[data-theme="doodle"] .score-container:after,
+body[data-theme="doodle"] .best-container:after {
+  color: rgba(59, 53, 44, 0.7);
+}
+body[data-theme="doodle"] .score-container .score-addition,
+body[data-theme="doodle"] .best-container .score-addition {
+  color: rgba(59, 53, 44, 0.9);
+}
+body[data-theme="doodle"] .theme-select,
+body[data-theme="doodle"] .restart-button {
+  background: #d9cdb4;
+  color: #3b352c;
+  border-radius: 4px;
+}
+body[data-theme="doodle"] .theme-select:focus-visible,
+body[data-theme="doodle"] a.restart-button:focus-visible {
+  outline: 3px solid #8f6a2c;
+  outline-offset: 2px;
+}
+body[data-theme="doodle"] .game-container .game-message p {
+  font-family: "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive, system-ui;
+  font-weight: 700;
+}
+body[data-theme="doodle"] .game-container .game-message {
+  background: rgba(250, 247, 239, 0.72);
+  color: #3b352c;
+}
+body[data-theme="doodle"] .game-container .game-message a.keep-playing-button,
+body[data-theme="doodle"] .game-container .game-message a.retry-button {
+  background: #d9cdb4;
+  color: #3b352c;
+}
+body[data-theme="doodle"] .game-container .game-message a.keep-playing-button:focus-visible,
+body[data-theme="doodle"] .game-container .game-message a.retry-button:focus-visible {
+  outline: 3px solid #8f6a2c;
+  outline-offset: 2px;
+}
+
+/* Doodle overrides for the sound toggle (base styles live next to
+ * .restart-button) — the button is chrome, so it only changes material. */
+body[data-theme="doodle"] .sound-toggle {
+  background: #d9cdb4;
+  color: #3b352c;
+}
+body[data-theme="doodle"] .sound-toggle:focus-visible {
+  outline: 3px solid #8f6a2c;
+  outline-offset: 2px;
+}
+
+/* ─── View transitions ───────────────────────────────────────────
+ * Theme switches and New Game cross-fade through the native View
+ * Transitions API (see js/view_transitions.js). The default 250 ms is a
+ * touch languid for a board that is already animated; 220 ms reads as a
+ * single gesture. The script skips the API entirely under reduced
+ * motion, and the media query keeps any transition that slips through
+ * from animating. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root) {
     animation: none;
   }
 }

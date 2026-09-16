@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "serve . -l 8080",
+    "prestart": "node tools/generate-tiles.mjs",
     "build": "node build-bundle.js",
+    "tiles": "node tools/generate-tiles.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

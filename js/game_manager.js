@@ -1,11 +1,15 @@
 /* exported GameManager */
-/* global Grid, Tile, themeManager, DIRECTIONS */
+/* global Grid, Tile, themeManager, DIRECTIONS, soundManager, ViewTransitions */
 class GameManager {
   constructor(size, InputManager, Actuator, StorageManager) {
     this.size = size; // Size of the grid
     this.inputManager = new InputManager();
     this.storageManager = new StorageManager();
     this.actuator = new Actuator(themeManager);
+
+    // Hand the shared sound instance its storage manager so the player's
+    // mute preference is read on boot and written on every change.
+    soundManager.attachStorage(this.storageManager);
 
     this.startTiles = 2;
     this.winThreshold = themeManager.get().winThreshold;
@@ -32,9 +36,13 @@ class GameManager {
 
   // Restart the game
   restart() {
-    this.storageManager.clearGameState();
-    this.actuator.continueGame(); // Clear the game won/lost message
-    this.setup();
+    // A New Game replaces the whole board, which is exactly what a view
+    // transition is for (see js/view_transitions.js). Merges are not.
+    ViewTransitions.run(() => {
+      this.storageManager.clearGameState();
+      this.actuator.continueGame(); // Clear the game won/lost message
+      this.setup();
+    });
   }
 
   // Keep playing after winning (allows going over 2048)
@@ -165,6 +173,9 @@ class GameManager {
     const vector = this.getVector(direction);
     const traversals = this.buildTraversals(vector);
     let moved = false;
+    // Values this move produced, in the order they merged, so the sound
+    // layer can play one blip per merge instead of a single louder one.
+    const mergedValues = [];
 
     // Save the current tile positions and remove merger information
     this.prepareTiles();
@@ -192,6 +203,7 @@ class GameManager {
 
             // Update the score
             this.score += merged.value;
+            mergedValues.push(merged.value);
 
             // Reaching or exceeding the theme's win threshold wins the
             // game. `>=` keeps custom themes with non-power-of-2 thresholds
@@ -213,6 +225,16 @@ class GameManager {
 
       if (!this.movesAvailable()) {
         this.over = true; // Game over!
+      }
+
+      // Sound follows the move that just happened: the game-over motif
+      // replaces the merge/move blips rather than layering on top of them.
+      if (this.over) {
+        soundManager.gameOver();
+      } else if (mergedValues.length > 0) {
+        soundManager.merge(mergedValues);
+      } else {
+        soundManager.move();
       }
 
       this.actuate();

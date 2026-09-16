@@ -29,6 +29,7 @@ class MockStorageManager {
     this.state = seedState;
     this.best = 0;
     this.clearCount = 0;
+    this.sound = false;
   }
   getGameState() {
     return this.state;
@@ -45,6 +46,14 @@ class MockStorageManager {
   }
   setBestScore(s) {
     this.best = s;
+  }
+  // The real LocalStorageManager also carries the sound preference and
+  // GameManager reads it while constructing, so the stub mirrors it.
+  getSoundEnabled() {
+    return this.sound;
+  }
+  setSoundEnabled(enabled) {
+    this.sound = Boolean(enabled);
   }
 }
 
