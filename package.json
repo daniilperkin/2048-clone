@@ -23,7 +23,7 @@
     "jsdom": "^30.0.1",
     "prettier": "^3.9.8",
     "serve": "^14.2.6",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.1"
   },
   "engines": {
     "node": ">=20"
