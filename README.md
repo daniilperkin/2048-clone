@@ -7,13 +7,13 @@ A modernized fork of [2048](https://github.com/gabrielecirulli/2048), originally
 This fork modernizes the original game with:
 
 - **ES6+ code** — classes, `const`/`let`, arrow functions, template literals
-- **Theme system** — four built-in themes (Classic, Developer, Agile, Fibonacci) with custom tile labels, colors, and win thresholds. Themes are selectable at runtime and persisted to `localStorage`.
+- **Theme system** — five built-in themes (Classic, Developer, Agile, Fibonacci, Doodle) with custom tile labels, colors, and win thresholds. Themes are selectable at runtime and persisted to `localStorage`.
 - **Accessibility** — ARIA grid roles, `aria-live` for game messages, `:focus-visible` styles
 - **Single-file bundling** — `node build-bundle.js` produces a standalone `2048.html` with all JS and CSS inlined, for embedding as an easter egg in other projects
 - **ESLint 10 + Prettier 3** — modern flat config linting and formatting
 - **Undo** — take back up to 10 moves (button, **U** or **Ctrl/Cmd+Z**); history survives a reload
 - **Daily Challenge** — one seeded board per calendar day, identical for every player, with its own best score
-- **Vitest test suite** — 140+ unit tests covering game logic, input, rendering, storage, sound and the seeded RNG
+- **Vitest test suite** — 140+ tests covering game logic, input, rendering, storage, sound and the seeded RNG
 - **Namespaced localStorage** — keys are prefixed with `2048-` to avoid collisions on host pages
 
 ## Playing
@@ -42,6 +42,7 @@ Use the theme selector at the top of the page. Each theme has unique tile labels
 | Developer | 64            | Intern → Junior → … → Principal       |
 | Agile     | 128           | Backlog → Ticket → … → Deployed       |
 | Fibonacci | 128           | Fibonacci sequence (1, 2, 3, 5, … 21) |
+| Doodle    | 2048          | Numbers on hand-drawn SVG tile art    |
 
 Tiles past the last defined label get a roman-numeral suffix (e.g. "Deployed ii", "Deployed iii").
 
@@ -51,13 +52,13 @@ Tiles past the last defined label get a roman-numeral suffix (e.g. "Deployed ii"
 node build-bundle.js
 ```
 
-This produces `2048.html` — a standalone file with all JavaScript and CSS inlined. The file is gitignored and should be regenerated at deploy time.
+This produces `2048.html` — a standalone file with all JavaScript and CSS inlined (Doodle tile SVGs embedded as data URIs; the build runs `tools/generate-tiles.mjs` first). The file is gitignored and should be regenerated at deploy time.
 
 ## Development
 
 ### Prerequisites
 
-- Node.js (LTS recommended)
+- Node.js 20+ (LTS recommended)
 - npm
 
 ### Setup
@@ -70,7 +71,8 @@ npm install
 
 | Script                 | Description                           |
 | ---------------------- | ------------------------------------- |
-| `npm start`            | Start a local dev server on port 8080 |
+| `npm start`            | Generate tile art, then serve on 8080 |
+| `npm run tiles`        | Generate Doodle tile SVGs in `build/` |
 | `npm run build`        | Generate the single-file `2048.html`  |
 | `npm run lint`         | Run ESLint                            |
 | `npm run lint:fix`     | Run ESLint with auto-fix              |
@@ -86,7 +88,7 @@ npm install
 ├── build-bundle.js         # Single-file bundler (inlines JS + CSS)
 ├── js/                     # Game source (plain scripts, shared global scope)
 │   ├── directions.js       # Shared direction contract (UP/RIGHT/DOWN/LEFT)
-│   ├── themes.js           # ThemeManager + 4 theme definitions
+│   ├── themes.js           # ThemeManager + 5 theme definitions
 │   ├── keyboard_input_manager.js
 │   ├── random.js           # SeededRandom (mulberry32) for the Daily Challenge
 │   ├── grid.js             # Grid model
@@ -99,6 +101,7 @@ npm install
 │   └── application.js      # Bootstrap
 ├── style/                  # main.css (hand-maintained)
 ├── test/                   # Vitest + jsdom test suite
+├── tools/                  # generate-tiles.mjs (Doodle SVG art → build/tiles/, gitignored)
 └── .github/workflows/ci.yml
 ```
 
