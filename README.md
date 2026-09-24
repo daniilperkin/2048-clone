@@ -11,7 +11,9 @@ This fork modernizes the original game with:
 - **Accessibility** — ARIA grid roles, `aria-live` for game messages, `:focus-visible` styles
 - **Single-file bundling** — `node build-bundle.js` produces a standalone `2048.html` with all JS and CSS inlined, for embedding as an easter egg in other projects
 - **ESLint 10 + Prettier 3** — modern flat config linting and formatting
-- **Vitest test suite** — 105 unit tests covering core game logic (Tile, Grid, ThemeManager, LocalStorageManager, KeyboardInputManager, GameManager, HTMLActuator)
+- **Undo** — take back up to 10 moves (button, **U** or **Ctrl/Cmd+Z**); history survives a reload
+- **Daily Challenge** — one seeded board per calendar day, identical for every player, with its own best score
+- **Vitest test suite** — 140+ unit tests covering game logic, input, rendering, storage, sound and the seeded RNG
 - **Namespaced localStorage** — keys are prefixed with `2048-` to avoid collisions on host pages
 
 ## Playing
@@ -27,6 +29,7 @@ Then open http://localhost:8080 in your browser.
 
 - **Arrow keys** / **WASD** / **Vim keys (hjkl)** — move tiles
 - **R** — restart the game
+- **U** / **Ctrl+Z** / **Cmd+Z** — undo the last move
 - **Touch swipes** — move tiles on mobile devices
 
 ### Themes
@@ -79,15 +82,18 @@ npm install
 
 ```
 2048-mine/
-├── index.html              # Dev entry — loads 8 separate <script> tags
+├── index.html              # Dev entry — loads 12 separate <script> tags
 ├── build-bundle.js         # Single-file bundler (inlines JS + CSS)
 ├── js/                     # Game source (plain scripts, shared global scope)
 │   ├── directions.js       # Shared direction contract (UP/RIGHT/DOWN/LEFT)
 │   ├── themes.js           # ThemeManager + 4 theme definitions
 │   ├── keyboard_input_manager.js
+│   ├── random.js           # SeededRandom (mulberry32) for the Daily Challenge
 │   ├── grid.js             # Grid model
 │   ├── tile.js             # Tile value object
 │   ├── local_storage_manager.js
+│   ├── sound_manager.js    # Opt-in Web Audio merge/win/lose sounds
+│   ├── view_transitions.js # View Transitions API wrapper
 │   ├── html_actuator.js    # DOM renderer
 │   ├── game_manager.js     # Controller: move/merge/win/lose logic
 │   └── application.js      # Bootstrap
