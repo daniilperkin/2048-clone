@@ -6,6 +6,8 @@ class HTMLActuator {
     this.scoreContainer = document.querySelector(".score-container");
     this.bestContainer = document.querySelector(".best-container");
     this.messageContainer = document.querySelector(".game-message");
+    this.undoButton = document.querySelector(".undo-button");
+    this.dailyButton = document.querySelector(".daily-button");
 
     this.score = 0;
   }
@@ -22,6 +24,7 @@ class HTMLActuator {
 
       this.updateScore(metadata.score);
       this.updateBestScore(metadata.bestScore);
+      this.updateControls(metadata);
 
       if (metadata.terminated) {
         if (metadata.over) {
@@ -31,6 +34,21 @@ class HTMLActuator {
         }
       }
     });
+  }
+
+  // Sync the Undo / Daily buttons with game state. Native `disabled` keeps
+  // an unavailable Undo out of the tab order and announces it as dimmed.
+  updateControls(metadata) {
+    if (this.undoButton) this.undoButton.disabled = !metadata.canUndo;
+    const daily = metadata.mode === "daily";
+    if (this.dailyButton) this.dailyButton.setAttribute("aria-pressed", String(daily));
+    document.body.classList.toggle("daily-mode", daily);
+    if (this.bestContainer) {
+      this.bestContainer.setAttribute(
+        "aria-label",
+        daily ? `Daily best score for ${metadata.date}` : "Best score"
+      );
+    }
   }
 
   // Continues the game (both restart and keep playing)

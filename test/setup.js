@@ -13,6 +13,7 @@ import { resolve } from "node:path";
 const GAME_FILES = [
   "js/directions.js",
   "js/tile.js",
+  "js/random.js",
   "js/grid.js",
   "js/local_storage_manager.js",
   "js/themes.js",
@@ -27,6 +28,7 @@ const GAME_FILES = [
 const GLOBAL_CLASSES = [
   "DIRECTIONS",
   "Tile",
+  "SeededRandom",
   "Grid",
   "LocalStorageManager",
   "ThemeManager",

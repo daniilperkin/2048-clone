@@ -31,10 +31,12 @@ class Grid {
   }
 
   // Find the first available random position
-  randomAvailableCell() {
+  // `random` defaults to Math.random; the Daily Challenge injects a seeded
+  // generator so the spawn sequence is reproducible.
+  randomAvailableCell(random = Math.random) {
     const cells = this.availableCells();
     if (cells.length) {
-      return cells[Math.floor(Math.random() * cells.length)];
+      return cells[Math.floor(random() * cells.length)];
     }
   }
 

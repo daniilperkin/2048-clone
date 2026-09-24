@@ -82,6 +82,7 @@ export default [
         KeyboardInputManager: "readonly",
         GameManager: "readonly",
         HTMLActuator: "readonly",
+        SeededRandom: "readonly",
         DIRECTIONS: "readonly",
       },
     },

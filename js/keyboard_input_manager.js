@@ -63,6 +63,19 @@ class KeyboardInputManager {
         document.activeElement &&
         ["SELECT", "INPUT", "TEXTAREA"].includes(document.activeElement.tagName);
 
+      // Undo: Ctrl/Cmd+Z, or U on its own.
+      const isUndo =
+        ((event.ctrlKey || event.metaKey) &&
+          !event.altKey &&
+          !event.shiftKey &&
+          event.key.toLowerCase() === "z") ||
+        (!modifiers && (event.key === "u" || event.key === "U"));
+      if (isUndo && !inFormControl) {
+        event.preventDefault();
+        if (!event.repeat) this.emit("undo");
+        return;
+      }
+
       if (!modifiers && !inFormControl) {
         if (mapped !== undefined) {
           event.preventDefault();
@@ -84,6 +97,8 @@ class KeyboardInputManager {
     this.bindButtonPress(".retry-button", this.restart);
     this.bindButtonPress(".restart-button", this.restart);
     this.bindButtonPress(".keep-playing-button", this.keepPlaying);
+    this.bindButtonPress(".undo-button", this.undo);
+    this.bindButtonPress(".daily-button", this.toggleDaily);
 
     // Respond to swipe events
     let touchStartClientX, touchStartClientY;
@@ -139,6 +154,16 @@ class KeyboardInputManager {
     this.emit("restart");
   }
 
+  undo(event) {
+    event.preventDefault();
+    this.emit("undo");
+  }
+
+  toggleDaily(event) {
+    event.preventDefault();
+    this.emit("toggleDaily");
+  }
+
   keepPlaying(event) {
     event.preventDefault();
     this.emit("keepPlaying");
@@ -146,6 +171,8 @@ class KeyboardInputManager {
 
   bindButtonPress(selector, fn) {
     const button = document.querySelector(selector);
+    // Optional controls (e.g. older markup or test fixtures) may be absent.
+    if (!button) return;
 
     // On touch devices both 'touchend' and 'click' fire (~300ms apart).
     // Use a flag to prevent the handler from executing twice for a

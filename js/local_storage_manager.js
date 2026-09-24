@@ -27,6 +27,11 @@ class LocalStorageManager {
     this.bestScoreKey = "2048-best-score";
     this.gameStateKey = "2048-game-state";
     this.soundKey = "2048-sound";
+    this.modeKey = "2048-mode";
+    // Daily Challenge keeps its own save and best score so it never
+    // touches the Classic record.
+    this.dailyBestKey = "2048-daily-best";
+    this.dailyStateKey = "2048-daily-state";
 
     const supported = this.localStorageSupported();
     this.storage = supported ? window.localStorage : fakeStorage;
@@ -45,40 +50,66 @@ class LocalStorageManager {
   }
 
   // Best score getters/setters
-  getBestScore() {
+  getBestScore(mode = "classic", date) {
+    if (mode === "daily") {
+      // Stored as {date, score}; yesterday's record reads as 0.
+      try {
+        const rec = JSON.parse(this.storage.getItem(this.dailyBestKey));
+        return rec && rec.date === date ? Number(rec.score) || 0 : 0;
+      } catch (_e) {
+        return 0;
+      }
+    }
     // localStorage (and fakeStorage) return strings or null; coerce to
     // a number so callers always get a consistent numeric type.
     return Number(this.storage.getItem(this.bestScoreKey)) || 0;
   }
 
-  setBestScore(score) {
+  setBestScore(score, mode = "classic", date) {
+    if (mode === "daily") {
+      this.storage.setItem(this.dailyBestKey, JSON.stringify({ date, score }));
+      return;
+    }
     this.storage.setItem(this.bestScoreKey, score);
   }
 
   // Game state getters/setters and clearing
-  getGameState() {
-    const stateJSON = this.storage.getItem(this.gameStateKey);
+  stateKeyFor(mode) {
+    return mode === "daily" ? this.dailyStateKey : this.gameStateKey;
+  }
+
+  getGameState(mode) {
+    const stateJSON = this.storage.getItem(this.stateKeyFor(mode));
     if (!stateJSON) return null;
     try {
       return JSON.parse(stateJSON);
     } catch (error) {
       // Corrupted state — clear it so the game starts fresh instead of crashing
-      this.clearGameState();
+      this.clearGameState(mode);
       return null;
     }
   }
 
-  setGameState(gameState) {
+  setGameState(gameState, mode) {
     try {
-      this.storage.setItem(this.gameStateKey, JSON.stringify(gameState));
+      this.storage.setItem(this.stateKeyFor(mode), JSON.stringify(gameState));
     } catch (error) {
       // Quota exceeded or storage disabled — silently drop the save
-      this.clearGameState();
+      this.clearGameState(mode);
     }
   }
 
-  clearGameState() {
-    this.storage.removeItem(this.gameStateKey);
+  clearGameState(mode) {
+    this.storage.removeItem(this.stateKeyFor(mode));
+  }
+
+  // Last selected mode ("classic" | "daily").
+  getMode() {
+    return this.storage.getItem(this.modeKey) === "daily" ? "daily" : "classic";
+  }
+
+  setMode(mode) {
+    this.storage.setItem(this.modeKey, mode);
   }
 
   // Sound preference. Off by default: an absent key reads as disabled, so

@@ -25,6 +25,7 @@ const JS_FILES = [
   "js/sound_manager.js",
   "js/keyboard_input_manager.js",
   "js/tile.js",
+  "js/random.js",
   "js/grid.js",
   "js/local_storage_manager.js",
   "js/html_actuator.js",

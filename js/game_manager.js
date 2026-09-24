@@ -1,5 +1,5 @@
 /* exported GameManager */
-/* global Grid, Tile, themeManager, DIRECTIONS, soundManager, ViewTransitions */
+/* global Grid, Tile, SeededRandom, themeManager, DIRECTIONS, soundManager, ViewTransitions */
 class GameManager {
   constructor(size, InputManager, Actuator, StorageManager) {
     this.size = size; // Size of the grid
@@ -13,10 +13,17 @@ class GameManager {
 
     this.startTiles = 2;
     this.winThreshold = themeManager.get().winThreshold;
+    // Undo depth. Snapshots are persisted with the game, so the cap also
+    // bounds how much localStorage one save uses.
+    this.maxUndo = 10;
+    // "classic" (Math.random) or "daily" (seeded from today's date).
+    this.mode = this.storageManager.getMode ? this.storageManager.getMode() : "classic";
 
     this.inputManager.on("move", this.move.bind(this));
     this.inputManager.on("restart", this.restart.bind(this));
     this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
+    this.inputManager.on("undo", this.undo.bind(this));
+    this.inputManager.on("toggleDaily", this.toggleDaily.bind(this));
 
     themeManager.onChange((theme) => {
       this.winThreshold = theme.winThreshold;
@@ -39,7 +46,7 @@ class GameManager {
     // A New Game replaces the whole board, which is exactly what a view
     // transition is for (see js/view_transitions.js). Merges are not.
     ViewTransitions.run(() => {
-      this.storageManager.clearGameState();
+      this.storageManager.clearGameState(this.mode);
       this.actuator.continueGame(); // Clear the game won/lost message
       this.setup();
     });
@@ -63,40 +70,52 @@ class GameManager {
 
   // Set up the game
   setup() {
-    const previousState = this.storageManager.getGameState();
+    this.date = SeededRandom.dateKey();
+    this.history = [];
+    this.rng = null;
+    let previousState = this.storageManager.getGameState(this.mode);
+    // A Daily save from an earlier day is stale: today has a new board.
+    if (previousState && this.mode === "daily" && previousState.date !== this.date) {
+      this.storageManager.clearGameState(this.mode);
+      previousState = null;
+    }
 
     // Reload the game from a previous game if present
     if (previousState) {
       try {
-        this.grid = new Grid(previousState.grid.size, previousState.grid.cells);
-        this.score = previousState.score;
-        this.over = previousState.over;
-        this.won = previousState.won;
-        this.keepPlayingEnabled =
-          previousState.keepPlayingEnabled || previousState.keepPlaying || false;
+        this.applySnapshot(previousState);
+        this.history = Array.isArray(previousState.history) ? previousState.history : [];
       } catch (_e) {
         // Malformed persisted state — start a fresh game instead of crashing
-        this.storageManager.clearGameState();
-        this.grid = new Grid(this.size);
-        this.score = 0;
-        this.over = false;
-        this.won = false;
-        this.keepPlayingEnabled = false;
-        this.addStartTiles();
+        this.storageManager.clearGameState(this.mode);
+        this.startFresh();
       }
     } else {
-      this.grid = new Grid(this.size);
-      this.score = 0;
-      this.over = false;
-      this.won = false;
-      this.keepPlayingEnabled = false;
-
-      // Add the initial tiles
-      this.addStartTiles();
+      this.startFresh();
     }
 
     // Update the actuator
     this.actuate();
+  }
+
+  startFresh() {
+    this.history = [];
+    this.rng = this.mode === "daily" ? new SeededRandom(SeededRandom.seedFor(this.date)) : null;
+    this.grid = new Grid(this.size);
+    this.score = 0;
+    this.over = false;
+    this.won = false;
+    this.keepPlayingEnabled = false;
+    this.addStartTiles();
+  }
+
+  applySnapshot(s) {
+    this.grid = new Grid(s.grid.size, s.grid.cells);
+    this.score = s.score;
+    this.over = s.over;
+    this.won = s.won;
+    this.keepPlayingEnabled = s.keepPlayingEnabled || s.keepPlaying || false;
+    this.rng = this.mode === "daily" ? new SeededRandom(s.rngState) : null;
   }
 
   // Set up the initial tiles to start the game with
@@ -109,31 +128,47 @@ class GameManager {
   // Adds a tile in a random position
   addRandomTile() {
     if (this.grid.cellsAvailable()) {
-      const value = Math.random() < 0.9 ? 2 : 4;
-      const tile = new Tile(this.grid.randomAvailableCell(), value);
+      const random = this.rng ? () => this.rng.next() : Math.random;
+      const value = random() < 0.9 ? 2 : 4;
+      const tile = new Tile(this.grid.randomAvailableCell(random), value);
       this.grid.insertTile(tile);
     }
   }
 
   // Sends the updated grid to the actuator
   actuate() {
-    if (this.storageManager.getBestScore() < this.score) {
-      this.storageManager.setBestScore(this.score);
+    const bestArgs = [this.mode, this.date];
+    if (this.storageManager.getBestScore(...bestArgs) < this.score) {
+      this.storageManager.setBestScore(this.score, ...bestArgs);
     }
 
     // Clear the state when the game is over (game over only, not win)
     if (this.over) {
-      this.storageManager.clearGameState();
+      this.storageManager.clearGameState(this.mode);
     } else {
-      this.storageManager.setGameState(this.serialize());
+      this.storageManager.setGameState(this.serialize(), this.mode);
     }
 
     this.actuator.actuate(this.grid, {
       score: this.score,
       over: this.over,
       won: this.won,
-      bestScore: this.storageManager.getBestScore(),
+      bestScore: this.storageManager.getBestScore(...bestArgs),
       terminated: this.isGameTerminated(),
+      canUndo: this.canUndo(),
+      mode: this.mode,
+      date: this.date,
+    });
+  }
+
+  // Switch between Classic and the Daily Challenge. Each mode keeps its
+  // own save, so toggling back resumes where the player left off.
+  toggleDaily() {
+    ViewTransitions.run(() => {
+      this.mode = this.mode === "daily" ? "classic" : "daily";
+      if (this.storageManager.setMode) this.storageManager.setMode(this.mode);
+      this.actuator.continueGame();
+      this.setup();
     });
   }
 
@@ -145,7 +180,38 @@ class GameManager {
       over: this.over,
       won: this.won,
       keepPlayingEnabled: this.keepPlayingEnabled,
+      mode: this.mode,
+      date: this.date,
+      rngState: this.rng ? this.rng.state : null,
+      history: this.history,
     };
+  }
+
+  // One undo step: the board as it was, plus the RNG position so the
+  // Daily Challenge replays the same spawn (undo can't re-roll tiles).
+  snapshot() {
+    return {
+      grid: this.grid.serialize(),
+      score: this.score,
+      over: this.over,
+      won: this.won,
+      keepPlayingEnabled: this.keepPlayingEnabled,
+      rngState: this.rng ? this.rng.state : null,
+    };
+  }
+
+  canUndo() {
+    return this.history.length > 0;
+  }
+
+  // Step back one move. Works after game over too, so a losing move can
+  // be taken back.
+  undo() {
+    const snap = this.history.pop();
+    if (!snap) return;
+    this.applySnapshot(snap);
+    this.actuator.continueGame(); // Clear a win/lose overlay
+    this.actuate();
   }
 
   // Save all tile positions and remove merger info
@@ -170,6 +236,8 @@ class GameManager {
     // 0: up, 1: right, 2: down, 3: left
     if (this.isGameTerminated()) return; // Don't do anything if the game's over
 
+    // Snapshot before mutating; only kept if the move actually changes the board.
+    const before = this.snapshot();
     const vector = this.getVector(direction);
     const traversals = this.buildTraversals(vector);
     let moved = false;
@@ -221,6 +289,8 @@ class GameManager {
     });
 
     if (moved) {
+      this.history.push(before);
+      if (this.history.length > this.maxUndo) this.history.shift();
       this.addRandomTile();
 
       if (!this.movesAvailable()) {
