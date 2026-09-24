@@ -241,7 +241,7 @@ hr {
 }
 .game-container .game-message a {
   display: inline-block;
-  background: #8f7a66;
+  background: #776e65;
   border-radius: 3px;
   padding: 0 20px;
   text-decoration: none;
@@ -608,7 +608,7 @@ body[data-theme="classic"] .tile.tile-2048 .tile-inner {
 .theme-select {
   flex: 1;
   display: inline-block;
-  background: #bbada0;
+  background: #776e65;
   border: none;
   border-radius: 3px;
   padding: 0 12px;
@@ -627,7 +627,7 @@ body[data-theme="classic"] .tile.tile-2048 .tile-inner {
 
 .restart-button {
   flex: 1;
-  background: #8f7a66;
+  background: #776e65;
   border-radius: 3px;
   padding: 0 20px;
   text-decoration: none;
@@ -650,7 +650,7 @@ body[data-theme="classic"] .tile.tile-2048 .tile-inner {
   padding: 0;
   border: none;
   border-radius: 3px;
-  background: #8f7a66;
+  background: #776e65;
   color: #f9f6f2;
   cursor: pointer;
 }
@@ -755,7 +755,7 @@ body[data-theme="classic"] .tile.tile-2048 .tile-inner {
   }
   .game-container .game-message a {
     display: inline-block;
-    background: #8f7a66;
+    background: #776e65;
     border-radius: 3px;
     padding: 0 20px;
     text-decoration: none;
