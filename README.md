@@ -12,7 +12,7 @@ This fork modernizes the original game with:
 - **Single-file bundling** — `node build-bundle.js` produces a standalone `2048.html` with all JS and CSS inlined, for embedding as an easter egg in other projects
 - **ESLint 10 + Prettier 3** — modern flat config linting and formatting
 - **Undo** — take back up to 10 moves (button, **U** or **Ctrl/Cmd+Z**); history survives a reload
-- **Daily Challenge** — one seeded board per calendar day, identical for every player, with its own best score
+- **Daily Challenge** — one seeded board per local calendar day, identical for every player on the same date, with its own best score
 - **Vitest test suite** — 140+ tests covering game logic, input, rendering, storage, sound and the seeded RNG
 - **Namespaced localStorage** — keys are prefixed with `2048-` to avoid collisions on host pages
 

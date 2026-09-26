@@ -32,8 +32,6 @@ All of the above must pass cleanly before a PR will be merged.
 
 We have to be conservative with the core game. This means that some modifications won't be merged, or will have to be evaluated carefully before being merged:
 
-- Undo/redo features
-- Save/reload features
 - Changes to how the tiles look or their contents
 - Changes to the layout
 - Changes to the grid size
