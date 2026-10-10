@@ -58,7 +58,7 @@ This produces `2048.html` — a standalone file with all JavaScript and CSS inli
 
 ### Prerequisites
 
-- Node.js 20+ (LTS recommended)
+- Node.js 22.22.2+ (LTS recommended — required by the jsdom test environment)
 - npm
 
 ### Setup

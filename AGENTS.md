@@ -4,7 +4,7 @@ Modernized, single-page 2048 game fork with theme switcher, accessibility (WCAG 
 
 ## Tech Stack & Architecture
 
-- **Runtime**: Vanilla JavaScript (plain `<script>` tags, shared global scope — no ES modules; Node 20+ for tooling)
+- **Runtime**: Vanilla JavaScript (plain `<script>` tags, shared global scope — no ES modules; Node 22.22.2+ for tooling — the jsdom test environment requires it)
 - **Testing**: Vitest (`vitest run`)
 - **Linting & Formatting**: ESLint 10 (`eslint .`), Prettier 3 (`prettier --check .`)
 - **Bundler**: `build-bundle.js` (inlines all CSS, JS, and assets into standalone `2048.html`)
