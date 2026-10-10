@@ -5,6 +5,9 @@ npm-debug.log*
 # Generated single-file bundle (regenerate with: node build-bundle.js)
 2048.html
 
+# Vitest coverage report (regenerate with: npm run coverage)
+coverage/
+
 # Build-time tile art (regenerate with: node tools/generate-tiles.mjs)
 build/
 

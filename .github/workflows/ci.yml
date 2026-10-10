@@ -9,9 +9,15 @@ on:
 permissions:
   contents: read
 
+# Supersede in-flight runs for the same ref: a rapid series of pushes (or a
+# dependabot rebase) should not queue redundant jobs on stale commits.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  lint-and-format:
-    name: Lint & Format Check
+  gate:
+    name: Gate (lint, format, test, build)
     runs-on: ubuntu-latest
 
     steps:
@@ -33,8 +39,18 @@ jobs:
       - name: Check Prettier formatting
         run: npm run format:check
 
-      - name: Run tests
-        run: npm test
+      - name: Run tests with coverage thresholds
+        run: npm run coverage
 
       - name: Build single-file bundle
         run: npm run build
+
+      # The bundle is gitignored, so the artifact upload is how a built
+      # 2048.html is retrieved from CI without running the build locally.
+      - name: Upload single-file bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: 2048-single-file-bundle
+          path: 2048.html
+          if-no-files-found: error
+          retention-days: 14

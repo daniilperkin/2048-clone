@@ -9,6 +9,7 @@
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 
 const GAME_FILES = [
   "js/directions.js",
@@ -46,14 +47,33 @@ let loaded = false;
 export function loadGameFiles() {
   if (loaded) return;
   for (const file of GAME_FILES) {
-    const path = resolve(process.cwd(), file);
-    let source = readFileSync(path, "utf-8");
+    const filePath = resolve(process.cwd(), file);
+    let source = readFileSync(filePath, "utf-8");
     // Append explicit global assignments so class declarations
     // are accessible from test files via globalThis.
     for (const cls of GLOBAL_CLASSES) {
       source += `\nif (typeof ${cls} !== "undefined") globalThis.${cls} = ${cls};\n`;
     }
-    (0, eval)(source);
+    evalWithSourceUrl(source, filePath);
   }
   loaded = true;
+}
+
+/**
+ * Evaluate js/application.js — the bootstrap runs immediately on load and
+ * needs a mounted DOM, so it is deliberately not part of GAME_FILES; the
+ * bootstrap test loads it explicitly after building its fixtures.
+ */
+export function loadApplication() {
+  const filePath = resolve(process.cwd(), "js/application.js");
+  evalWithSourceUrl(readFileSync(filePath, "utf-8"), filePath);
+}
+
+/**
+ * Attribute evaluated code to its real path so V8 coverage
+ * (npm run coverage) maps it to js/** instead of an anonymous eval.
+ */
+function evalWithSourceUrl(source, filePath) {
+  source += `\n//# sourceURL=${pathToFileURL(filePath).href}`;
+  (0, eval)(source);
 }
