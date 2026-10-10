@@ -1241,3 +1241,451 @@ body[data-theme="doodle"] .game-container .game-message .share-button {
 body[data-theme="doodle"] .game-message .share-button:focus-visible {
   outline: 3px solid #8f6a2c;
 }
+
+/* ─── Per-theme gradient backgrounds ─────────────────────────────
+ * A quiet depth behind the board instead of one flat cream. Very
+ * subtle by design: every stop stays within a few points of the
+ * classic palette, so tile contrast never changes between themes. */
+body {
+  min-height: calc(100vh - 40px);
+  background-attachment: fixed;
+}
+body[data-theme="classic"] {
+  background-image: linear-gradient(165deg, #fbf8ef 0%, #f3ead6 100%);
+}
+body[data-theme="developer"] {
+  background-image: linear-gradient(165deg, #f3f7fa 0%, #e3ecf4 100%);
+}
+body[data-theme="agile"] {
+  background-image: linear-gradient(165deg, #faf6ed 0%, #f0e5d1 100%);
+}
+body[data-theme="fibonacci"] {
+  background-image: linear-gradient(165deg, #f8f4ea 0%, #ede3d0 100%);
+}
+body[data-theme="doodle"] {
+  background-image: linear-gradient(165deg, #f9f5e9 0%, #efe6d2 100%);
+}
+
+/* ─── Moves & time boxes ─────────────────────────────────────────
+ * Two mini scoreboards next to Score/Best. Not live regions: they
+ * change on every move / every half second, and the score boxes
+ * already announce; a static aria-label is enough. */
+.moves-container,
+.timer-container {
+  position: relative;
+  display: inline-block;
+  background: #776e65;
+  padding: 15px 10px;
+  font-size: 18px;
+  height: 25px;
+  line-height: 47px;
+  font-weight: bold;
+  border-radius: 3px;
+  color: white;
+  margin-top: 8px;
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+}
+.moves-container:after,
+.timer-container:after {
+  position: absolute;
+  width: 100%;
+  top: 10px;
+  left: 0;
+  text-transform: uppercase;
+  font-size: 13px;
+  line-height: 13px;
+  text-align: center;
+  color: #f9f6f2;
+}
+.moves-container:after {
+  content: "Moves";
+}
+.timer-container:after {
+  content: "Time";
+}
+
+@media screen and (max-width: 540px) {
+  .moves-container,
+  .timer-container {
+    margin-top: 0;
+    padding: 15px 6px;
+    font-size: 13px;
+  }
+  .moves-container:after,
+  .timer-container:after {
+    font-size: 10px;
+  }
+}
+
+/* ─── Settings panel, button and switches ────────────────────────
+ * The Settings panel follows the Stats panel's pattern; the button
+ * joins the Undo/Daily/Stats family; the switches are 46x26 pills
+ * driven purely by [aria-checked]. */
+.settings-button {
+  flex: 0 0 auto;
+  height: 40px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 3px;
+  background: #776e65;
+  color: #f9f6f2;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.settings-button[aria-expanded="true"] {
+  box-shadow: inset 0 -4px 0 #f67c5f;
+}
+.settings-button:focus-visible {
+  outline: 3px solid #f67c5f;
+  outline-offset: 2px;
+}
+body[data-theme="doodle"] .settings-button {
+  background: #d9cdb4;
+  color: #3b352c;
+  border-radius: 4px;
+}
+body[data-theme="doodle"] .settings-button:focus-visible {
+  outline: 3px solid #8f6a2c;
+}
+
+.settings-panel {
+  margin-top: 8px;
+  padding: 6px 14px;
+  background: #eee4da;
+  border-radius: 3px;
+}
+.settings-panel[hidden] {
+  display: none;
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+}
+.settings-row + .settings-row {
+  border-top: 1px solid rgba(119, 110, 101, 0.15);
+}
+.settings-label {
+  color: #776e65;
+  font-weight: bold;
+}
+.settings-hint {
+  display: block;
+  font-weight: normal;
+  font-size: 13px;
+  opacity: 0.75;
+}
+.switch {
+  flex: 0 0 auto;
+  position: relative;
+  width: 46px;
+  height: 26px;
+  border: none;
+  border-radius: 13px;
+  padding: 0;
+  background: #bbada0;
+  cursor: pointer;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f9f6f2;
+  transition: transform 150ms ease-in-out;
+}
+.switch[aria-checked="true"] {
+  background: #edc22e;
+}
+.switch[aria-checked="true"]::after {
+  transform: translateX(20px);
+}
+.switch:focus-visible {
+  outline: 3px solid #f67c5f;
+  outline-offset: 2px;
+}
+body[data-theme="doodle"] .settings-panel {
+  background: #e8e0cf;
+  color: #3b352c;
+}
+body[data-theme="doodle"] .settings-label {
+  color: #3b352c;
+}
+body[data-theme="doodle"] .switch {
+  background: #c8bba0;
+}
+body[data-theme="doodle"] .switch[aria-checked="true"] {
+  background: #b8860b;
+}
+body.reduced-motion .switch::after {
+  transition: none;
+}
+
+/* ─── Ambience (opt-in animated background) ──────────────────────
+ * Two blurred, slowly drifting colour fields behind everything. Off
+ * by default (body.ambience-on); the layers are inert (no pointer
+ * events) and stop animating under reduced motion. */
+.ambience {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 600ms ease-in-out;
+  pointer-events: none;
+}
+body.ambience-on .ambience {
+  opacity: 1;
+}
+.container {
+  position: relative;
+  z-index: 1;
+}
+.ambience::before,
+.ambience::after {
+  content: "";
+  position: absolute;
+  width: 60vmax;
+  height: 60vmax;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.5;
+}
+.ambience::before {
+  top: -18%;
+  left: -12%;
+  background: radial-gradient(circle at 35% 35%, #f6c9a8, transparent 65%);
+  animation: ambience-drift-a 46s ease-in-out infinite alternate;
+}
+.ambience::after {
+  right: -14%;
+  bottom: -20%;
+  background: radial-gradient(circle at 60% 40%, #a9c6ee, transparent 65%);
+  animation: ambience-drift-b 58s ease-in-out infinite alternate;
+}
+@keyframes ambience-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(12vmax, 9vmax, 0) scale(1.12);
+  }
+}
+@keyframes ambience-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.08);
+  }
+  to {
+    transform: translate3d(-11vmax, -8vmax, 0) scale(0.95);
+  }
+}
+body.dark .ambience::before {
+  background: radial-gradient(circle at 35% 35%, #3a4a73, transparent 65%);
+  opacity: 0.4;
+}
+body.dark .ambience::after {
+  background: radial-gradient(circle at 60% 40%, #55395f, transparent 65%);
+  opacity: 0.4;
+}
+body.reduced-motion .ambience::before,
+body.reduced-motion .ambience::after {
+  animation: none;
+}
+
+/* ─── Celebrations (opt-in) ──────────────────────────────────────
+ * Confetti on a win, a soft glow on a loss — only while the player
+ * keeps Celebrations on and Animations enabled (checked in JS). */
+.celebration-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  overflow: hidden;
+  pointer-events: none;
+}
+.celebration-layer .confetti {
+  position: absolute;
+  top: -5vh;
+  width: 10px;
+  height: 16px;
+  border-radius: 2px;
+  opacity: 0.95;
+  animation: confetti-fall var(--fall-duration, 2.6s) linear var(--fall-delay, 0s) forwards;
+}
+@keyframes confetti-fall {
+  to {
+    transform: translate3d(var(--drift, 0px), 115vh, 0) rotate(720deg);
+    opacity: 0.85;
+  }
+}
+.game-message.celebrate-win {
+  animation: celebrate-glow 1.6s ease-out;
+}
+.game-message.celebrate-loss {
+  animation: celebrate-soft 1.6s ease-out;
+}
+@keyframes celebrate-glow {
+  0% {
+    box-shadow: inset 0 0 0 rgba(237, 194, 46, 0);
+  }
+  35% {
+    box-shadow: inset 0 0 60px 18px rgba(237, 194, 46, 0.55);
+  }
+  100% {
+    box-shadow: inset 0 0 0 rgba(237, 194, 46, 0);
+  }
+}
+@keyframes celebrate-soft {
+  0% {
+    box-shadow: inset 0 0 0 rgba(255, 255, 255, 0);
+  }
+  35% {
+    box-shadow: inset 0 0 50px 14px rgba(255, 255, 255, 0.35);
+  }
+  100% {
+    box-shadow: inset 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+body.reduced-motion .celebration-layer .confetti,
+body.reduced-motion .game-message.celebrate-win,
+body.reduced-motion .game-message.celebrate-loss {
+  animation: none;
+}
+
+/* ─── Dark mode ──────────────────────────────────────────────────
+ * Chrome only: tiles keep their theme colours — vivid on any
+ * background is the classic dark look. Sits after the gradients so
+ * it repaints the page background; doodle gets its own dark stock. */
+body.dark {
+  background: #17171f;
+  background-image: linear-gradient(165deg, #1c1c27 0%, #12121a 100%);
+  color: #d5d1ca;
+  color-scheme: dark;
+}
+body.dark a {
+  color: #d5d1ca;
+}
+body.dark .score-container,
+body.dark .best-container,
+body.dark .moves-container,
+body.dark .timer-container {
+  background: #262630;
+  color: #f2efe9;
+}
+body.dark .score-container:after,
+body.dark .best-container:after,
+body.dark .moves-container:after,
+body.dark .timer-container:after {
+  color: #9a958c;
+}
+body.dark .theme-select,
+body.dark .restart-button,
+body.dark .sound-toggle,
+body.dark .undo-button,
+body.dark .daily-button,
+body.dark .stats-button,
+body.dark .settings-button {
+  background: #33333e;
+  color: #e8e5df;
+}
+body.dark .stats-panel,
+body.dark .settings-panel {
+  background: #23232d;
+  color: #d5d1ca;
+}
+body.dark .stats-list dt,
+body.dark .settings-label {
+  color: #a8a39a;
+}
+body.dark .settings-row + .settings-row {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+body.dark .switch {
+  background: #44444f;
+}
+body.dark .switch[aria-checked="true"] {
+  background: #c9a227;
+}
+body.dark .game-container {
+  background: #262630;
+}
+body.dark .grid-cell {
+  background: rgba(255, 255, 255, 0.06);
+}
+body.dark .game-container .game-message {
+  background: rgba(16, 16, 24, 0.62);
+  color: #f2efe9;
+}
+body.dark .game-container .game-message a,
+body.dark .game-container .game-message .share-button {
+  background: #3a3a46;
+  color: #f2efe9;
+}
+body.dark .game-container .game-message.game-won {
+  background: rgba(237, 194, 46, 0.42);
+}
+body.dark hr {
+  border-bottom-color: #33333e;
+}
+/* Doodle keeps its paper character — just on dark stock. */
+body.dark[data-theme="doodle"] {
+  color: #d8d2c6;
+}
+body.dark[data-theme="doodle"] .game-container {
+  background: #2c2822;
+}
+body.dark[data-theme="doodle"] .grid-cell {
+  background: rgba(255, 255, 255, 0.05);
+}
+body.dark[data-theme="doodle"] .score-container,
+body.dark[data-theme="doodle"] .best-container,
+body.dark[data-theme="doodle"] .moves-container,
+body.dark[data-theme="doodle"] .timer-container {
+  background: #35302a;
+  color: #e4ddcf;
+}
+body.dark[data-theme="doodle"] .stats-panel,
+body.dark[data-theme="doodle"] .settings-panel {
+  background: #2f2b25;
+}
+body.dark[data-theme="doodle"] .theme-select,
+body.dark[data-theme="doodle"] .restart-button,
+body.dark[data-theme="doodle"] .sound-toggle,
+body.dark[data-theme="doodle"] .undo-button,
+body.dark[data-theme="doodle"] .daily-button,
+body.dark[data-theme="doodle"] .stats-button,
+body.dark[data-theme="doodle"] .settings-button {
+  background: #474038;
+  color: #e4ddcf;
+}
+body.dark[data-theme="doodle"] .switch {
+  background: #57503f;
+}
+body.dark[data-theme="doodle"] .game-container .game-message a,
+body.dark[data-theme="doodle"] .game-container .game-message .share-button {
+  background: #474038;
+  color: #e4ddcf;
+}
+
+/* ─── Reduced motion, player choice ──────────────────────────────
+ * The OS-level preference is handled by the media query above; this
+ * is the Settings toggle (body.reduced-motion), with the same
+ * effects. View transitions are skipped in JS. */
+body.reduced-motion .tile {
+  transition: none;
+}
+body.reduced-motion .tile-new .tile-inner,
+body.reduced-motion .tile-merged .tile-inner,
+body.reduced-motion .score-container .score-addition,
+body.reduced-motion .best-container .score-addition,
+body.reduced-motion .game-container .game-message {
+  animation: none;
+}

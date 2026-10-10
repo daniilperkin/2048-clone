@@ -5,10 +5,13 @@ class HTMLActuator {
     this.tileContainer = document.querySelector(".tile-container");
     this.scoreContainer = document.querySelector(".score-container");
     this.bestContainer = document.querySelector(".best-container");
+    this.movesContainer = document.querySelector(".moves-container");
+    this.timerContainer = document.querySelector(".timer-container");
     this.messageContainer = document.querySelector(".game-message");
     this.undoButton = document.querySelector(".undo-button");
     this.dailyButton = document.querySelector(".daily-button");
     this.shareButton = document.querySelector(".share-button");
+    this.celebrationLayer = document.querySelector(".celebration-layer");
 
     this.score = 0;
   }
@@ -35,6 +38,8 @@ class HTMLActuator {
 
     this.updateScore(metadata.score);
     this.updateBestScore(metadata.bestScore);
+    this.updateMoves(metadata.moves);
+    this.updateTimer(metadata.elapsed);
     this.updateControls(metadata);
     this.updateCells(grid);
 
@@ -80,6 +85,53 @@ class HTMLActuator {
           : `row ${y + 1} column ${x + 1}, empty`
       );
     });
+  }
+
+  // Moves made in the current game (see GameManager.move). Not a live
+  // region: it changes on every move, and the score already announces.
+  updateMoves(moves) {
+    if (this.movesContainer && moves !== undefined) {
+      this.movesContainer.textContent = String(moves);
+    }
+  }
+
+  // Elapsed play time ("MM:SS"), refreshed from the metadata on every
+  // render and by the application's interval while the clock runs.
+  updateTimer(text) {
+    if (this.timerContainer && text !== undefined) {
+      this.timerContainer.textContent = text;
+    }
+  }
+
+  // Opt-in celebration (see js/preferences.js): a confetti burst plus a
+  // glowing overlay on a win, a soft glow on a loss. Never called while
+  // animations are off — GameManager checks before invoking.
+  celebrate(won) {
+    if (!this.messageContainer) return;
+    const cls = won ? "celebrate-win" : "celebrate-loss";
+    this.messageContainer.classList.add(cls);
+    clearTimeout(this.celebrateTimer);
+    this.celebrateTimer = setTimeout(() => {
+      this.messageContainer.classList.remove(cls);
+    }, 1800);
+
+    if (!won || !this.celebrationLayer) return;
+    this.celebrationLayer.textContent = "";
+    const colors = ["#edc22e", "#f67c5f", "#63b3ed", "#68d391", "#f6ad55", "#e8a0bf"];
+    for (let i = 0; i < 42; i++) {
+      const piece = document.createElement("span");
+      piece.className = "confetti";
+      piece.style.left = `${Math.random() * 100}%`;
+      piece.style.background = colors[i % colors.length];
+      piece.style.setProperty("--fall-duration", `${(2.2 + Math.random() * 1.6).toFixed(2)}s`);
+      piece.style.setProperty("--fall-delay", `${(Math.random() * 0.4).toFixed(2)}s`);
+      piece.style.setProperty("--drift", `${(Math.random() * 160 - 80).toFixed(0)}px`);
+      this.celebrationLayer.appendChild(piece);
+    }
+    clearTimeout(this.confettiTimer);
+    this.confettiTimer = setTimeout(() => {
+      this.celebrationLayer.textContent = "";
+    }, 4600);
   }
 
   // Brief feedback on the Share button: swap the visible label and the

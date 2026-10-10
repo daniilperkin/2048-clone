@@ -1,5 +1,5 @@
 /* exported GameManager */
-/* global Grid, Tile, SeededRandom, themeManager, DIRECTIONS, soundManager, ViewTransitions, StatsTracker, ShareResult */
+/* global Grid, Tile, SeededRandom, themeManager, DIRECTIONS, soundManager, ViewTransitions, StatsTracker, ShareResult, preferences */
 class GameManager {
   constructor(size, InputManager, Actuator, StorageManager) {
     this.size = size; // Size of the grid
@@ -61,6 +61,8 @@ class GameManager {
   // Keep playing after winning (allows going over 2048)
   keepPlaying() {
     this.keepPlayingEnabled = true;
+    // The game continues, so the clock runs again (see move()).
+    this.endedAt = null;
     // Persist the new state so the win overlay doesn't reappear on
     // refresh before the next move. actuate() serializes (with
     // keepPlayingEnabled now true) and re-renders; continueGame() clears
@@ -109,6 +111,9 @@ class GameManager {
     this.rng = this.mode === "daily" ? new SeededRandom(SeededRandom.seedFor(this.date)) : null;
     this.grid = new Grid(this.size);
     this.score = 0;
+    this.moves = 0;
+    this.startedAt = Date.now();
+    this.endedAt = null;
     this.over = false;
     this.won = false;
     this.keepPlayingEnabled = false;
@@ -120,6 +125,9 @@ class GameManager {
   applySnapshot(s) {
     this.grid = new Grid(s.grid.size, s.grid.cells);
     this.score = s.score;
+    this.moves = s.moves || 0;
+    this.startedAt = typeof s.startedAt === "number" ? s.startedAt : Date.now();
+    this.endedAt = typeof s.endedAt === "number" ? s.endedAt : null;
     this.over = s.over;
     this.won = s.won;
     this.keepPlayingEnabled = s.keepPlayingEnabled || s.keepPlaying || false;
@@ -167,6 +175,8 @@ class GameManager {
       canUndo: this.canUndo(),
       mode: this.mode,
       date: this.date,
+      moves: this.moves,
+      elapsed: GameManager.formatElapsed(this.elapsedMs()),
     };
 
     // Inside a view-transition update phase the browser has paused rAF:
@@ -210,6 +220,9 @@ class GameManager {
     return {
       grid: this.grid.serialize(),
       score: this.score,
+      moves: this.moves,
+      startedAt: this.startedAt,
+      endedAt: this.endedAt,
       over: this.over,
       won: this.won,
       keepPlayingEnabled: this.keepPlayingEnabled,
@@ -227,6 +240,9 @@ class GameManager {
     return {
       grid: this.grid.serialize(),
       score: this.score,
+      moves: this.moves,
+      startedAt: this.startedAt,
+      endedAt: this.endedAt,
       over: this.over,
       won: this.won,
       keepPlayingEnabled: this.keepPlayingEnabled,
@@ -329,12 +345,19 @@ class GameManager {
     });
 
     if (moved) {
+      this.moves += 1;
       this.history.push(before);
       if (this.history.length > this.maxUndo) this.history.shift();
       this.addRandomTile();
 
       if (!this.movesAvailable()) {
         this.over = true; // Game over!
+      }
+
+      // The clock stops the moment an end overlay appears; "Keep going"
+      // restarts it (see keepPlaying()), and undo restores the snapshot.
+      if (this.over || (this.won && !this.keepPlayingEnabled)) {
+        this.endedAt = Date.now();
       }
 
       // Sound follows the move that just happened: the game-over motif
@@ -361,6 +384,16 @@ class GameManager {
     if (this.statsPrevious) return; // already counted for this game
     if (this.over || this.won) {
       this.statsPrevious = this.stats.record(this.won, this.bestTileValue());
+      // Opt-in celebration (see js/preferences.js): only on the first end
+      // of a game, and never while animations are turned off.
+      if (
+        typeof preferences !== "undefined" &&
+        preferences.celebrate &&
+        preferences.motion &&
+        typeof this.actuator.celebrate === "function"
+      ) {
+        this.actuator.celebrate(this.won);
+      }
     }
   }
 
@@ -371,6 +404,22 @@ class GameManager {
       if (tile && tile.value > best) best = tile.value;
     });
     return best;
+  }
+
+  // Milliseconds of play in the current game; frozen while an end overlay
+  // is showing and resumed by "Keep going" (see move()/keepPlaying()).
+  elapsedMs() {
+    return Math.max(0, (this.endedAt || Date.now()) - this.startedAt);
+  }
+
+  // "MM:SS", or "H:MM:SS" once past an hour.
+  static formatElapsed(ms) {
+    const total = Math.max(0, Math.floor(ms / 1000));
+    const pad = (n) => String(n).padStart(2, "0");
+    const seconds = pad(total % 60);
+    const minutes = Math.floor(total / 60) % 60;
+    const hours = Math.floor(total / 3600);
+    return hours > 0 ? `${hours}:${pad(minutes)}:${seconds}` : `${pad(minutes)}:${seconds}`;
   }
 
   // Get the vector representing the chosen direction

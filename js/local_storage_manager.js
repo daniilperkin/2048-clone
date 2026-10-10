@@ -143,4 +143,21 @@ class LocalStorageManager {
       // Quota exceeded or storage disabled — silently drop the update
     }
   }
+
+  // Generic boolean flags for UI preferences (dark mode, animations,
+  // ambience, celebrations — see js/preferences.js). Stored as "1"/"0"
+  // under 2048-<name> keys, so the namespacing rules apply unchanged.
+  getFlag(name, fallback = false) {
+    const raw = this.storage.getItem(`2048-${name}`);
+    if (raw === null || raw === undefined) return fallback;
+    return raw === "1";
+  }
+
+  setFlag(name, value) {
+    try {
+      this.storage.setItem(`2048-${name}`, value ? "1" : "0");
+    } catch (error) {
+      // Quota exceeded or storage disabled — silently drop the update
+    }
+  }
 }

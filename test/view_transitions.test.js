@@ -139,4 +139,23 @@ describe("ViewTransitions", () => {
     expect(rafSpy.mock.calls.length).toBe(rafCallsBefore);
     expect(ViewTransitions.inUpdate).toBe(false);
   });
+
+  it("skips the transition when the player turned animations off (Settings)", () => {
+    const startViewTransition = vi.fn();
+    document.startViewTransition = startViewTransition;
+    window.matchMedia = vi.fn(() => ({ matches: false }));
+    // Preferences.apply() maintains this class; the OS preference is false,
+    // so only the body class can trigger the skip.
+    document.body.classList.add("reduced-motion");
+
+    let ran = false;
+    const result = ViewTransitions.run(() => {
+      ran = true;
+    });
+    document.body.classList.remove("reduced-motion");
+
+    expect(ran).toBe(true);
+    expect(startViewTransition).not.toHaveBeenCalled();
+    expect(result).toBeNull();
+  });
 });

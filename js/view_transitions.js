@@ -19,7 +19,9 @@
  * actuator's synchronous renderNow() path while the update phase runs.
  *
  * Falls back to a plain synchronous call when the API is missing (Firefox
- * before 144, older Safari) or when the user asked for reduced motion.
+ * before 144, older Safari) or when motion is reduced — either by the OS
+ * preference or by the player turning animations off in Settings (the
+ * `reduced-motion` body class Preferences.apply() maintains).
  */
 const ViewTransitions = {
   /** True while a transition's update callback is executing. */
@@ -30,9 +32,13 @@ const ViewTransitions = {
   },
 
   prefersReducedMotion() {
-    return (
-      typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches
-    );
+    const byPreference =
+      typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const bySettings =
+      typeof document !== "undefined" &&
+      document.body &&
+      document.body.classList.contains("reduced-motion");
+    return byPreference || bySettings;
   },
 
   /**

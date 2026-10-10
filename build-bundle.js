@@ -36,6 +36,7 @@ const JS_FILES = [
   "js/local_storage_manager.js",
   "js/stats.js",
   "js/share.js",
+  "js/preferences.js",
   "js/html_actuator.js",
   "js/game_manager.js",
   "js/application.js",

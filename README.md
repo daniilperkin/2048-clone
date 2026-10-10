@@ -16,7 +16,10 @@ This fork modernizes the original game with:
 - **Stats panel** — lifetime games played/won, win rate, best tile and best win streak, with undo-aware bookkeeping (a taken-back ending move is not counted)
 - **Shareable results** — after a win or a loss, one click copies the score, best tile and an emoji board to the clipboard
 - **Installable & offline** — a web app manifest and service worker make the served build installable as a PWA and playable offline after the first visit (the standalone bundle is already offline by construction)
-- **Vitest test suite** — 180+ tests covering game logic, input, rendering, storage, sound, themes, the seeded RNG, the PWA shell and accessibility; CI enforces coverage thresholds
+- **Appearance options** — dark mode, subtle per-theme gradient backgrounds and an opt-in animated ambience layer, all behind one Settings panel; every visual effect is off until you turn it on
+- **Moves counter & timer** — live move count and elapsed play time per game, frozen while an end overlay shows, resumed by "Keep going", and persisted with the save
+- **Optional celebrations** — confetti on a win and a soft glow on a loss, opt-in from Settings
+- **Vitest test suite** — 200+ tests covering game logic, input, rendering, storage, sound, themes, the seeded RNG, the PWA shell, preferences and accessibility; CI enforces coverage thresholds
 - **Namespaced localStorage** — keys are prefixed with `2048-` to avoid collisions on host pages
 
 ## Playing
@@ -37,6 +40,7 @@ The served page is installable as a PWA (browser install button in the address b
 - **U** / **Ctrl+Z** / **Cmd+Z** — undo the last move
 - **Touch swipes** — move tiles on mobile devices
 - **Share** — after a win or a game over, copy the result (score, best tile, emoji board)
+- **Settings** — dark mode, animations, ambience and celebrations toggles (all persisted)
 
 ### Themes
 
@@ -51,6 +55,8 @@ Use the theme selector at the top of the page. Each theme has unique tile labels
 | Doodle    | 2048          | Numbers on hand-drawn SVG tile art    |
 
 Tiles past the last defined label get a roman-numeral suffix (e.g. "Deployed ii", "Deployed iii").
+
+Each theme also has its own subtle background gradient, and dark mode (Settings → Dark mode) re-skins the page chrome while tiles keep their theme colors — Doodle gets a dark paper stock of its own.
 
 ## Building the single-file bundle
 
@@ -103,7 +109,7 @@ npm install
 
 ```
 2048-mine/
-├── index.html              # Dev entry — loads 14 separate <script> tags
+├── index.html              # Dev entry — loads 15 separate <script> tags
 ├── manifest.webmanifest    # PWA install metadata
 ├── sw.js                   # Service worker: offline shell (guarded by test/pwa.test.js)
 ├── build-bundle.js         # Single-file bundler (shell extracted from index.html)
@@ -117,6 +123,7 @@ npm install
 │   ├── local_storage_manager.js
 │   ├── stats.js            # StatsTracker (lifetime stats, undo-aware)
 │   ├── share.js            # ShareResult (emoji-board summary + clipboard)
+│   ├── preferences.js      # Dark mode / motion / ambience / celebration flags
 │   ├── sound_manager.js    # Opt-in Web Audio merge/win/lose sounds
 │   ├── view_transitions.js # View Transitions API wrapper
 │   ├── html_actuator.js    # DOM renderer

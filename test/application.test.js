@@ -23,6 +23,9 @@ describe("application bootstrap", () => {
     localStorage.clear();
     themeManager.listeners = [];
     themeManager.set("classic");
+    // Preferences mirror onto body classes; reset them so tests that flip
+    // dark mode can't leak into the next bootstrap.
+    document.body.className = "";
     mountRealMarkup();
     window.requestAnimationFrame = (fn) => {
       fn();
@@ -79,6 +82,44 @@ describe("application bootstrap", () => {
     button.click();
     expect(panel.hasAttribute("hidden")).toBe(true);
     expect(button.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("settings panel opens and its switches flip and persist preferences", () => {
+    loadApplication();
+    const button = document.querySelector(".settings-button");
+    const panel = document.querySelector(".settings-panel");
+    expect(panel.hasAttribute("hidden")).toBe(true);
+
+    button.click();
+    expect(panel.hasAttribute("hidden")).toBe(false);
+    expect(button.getAttribute("aria-expanded")).toBe("true");
+
+    const darkSwitch = panel.querySelector(".switch-dark");
+    expect(darkSwitch.getAttribute("aria-checked")).toBe("false");
+    darkSwitch.click();
+    expect(darkSwitch.getAttribute("aria-checked")).toBe("true");
+    expect(document.body.classList.contains("dark")).toBe(true);
+    expect(localStorage.getItem("2048-dark")).toBe("1");
+
+    const motionSwitch = panel.querySelector(".switch-motion");
+    expect(motionSwitch.getAttribute("aria-checked")).toBe("true");
+    motionSwitch.click();
+    expect(motionSwitch.getAttribute("aria-checked")).toBe("false");
+    expect(document.body.classList.contains("reduced-motion")).toBe(true);
+
+    const ambienceSwitch = panel.querySelector(".switch-ambience");
+    ambienceSwitch.click();
+    expect(document.body.classList.contains("ambience-on")).toBe(true);
+
+    button.click();
+    expect(panel.hasAttribute("hidden")).toBe(true);
+    expect(button.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("renders the moves and timer boxes from the live game", () => {
+    loadApplication();
+    expect(document.querySelector(".moves-container").textContent).toBe("0");
+    expect(document.querySelector(".timer-container").textContent).toMatch(/^\d{2}:\d{2}$/);
   });
 
   it("registers the service worker when the manifest is linked", () => {

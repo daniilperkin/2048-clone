@@ -76,6 +76,8 @@ export default [
         LocalStorageManager: "readonly",
         StatsTracker: "readonly",
         ShareResult: "readonly",
+        Preferences: "readonly",
+        preferences: "readonly",
         ThemeManager: "readonly",
         themeManager: "readonly",
         ViewTransitions: "readonly",
