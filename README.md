@@ -8,12 +8,15 @@ This fork modernizes the original game with:
 
 - **ES6+ code** — classes, `const`/`let`, arrow functions, template literals
 - **Theme system** — five built-in themes (Classic, Developer, Agile, Fibonacci, Doodle) with custom tile labels, colors, and win thresholds. Themes are selectable at runtime and persisted to `localStorage`.
-- **Accessibility** — ARIA grid roles, `aria-live` for game messages, `:focus-visible` styles
-- **Single-file bundling** — `node build-bundle.js` produces a standalone `2048.html` with all JS and CSS inlined, for embedding as an easter egg in other projects
+- **Accessibility** — ARIA grid roles, `aria-live` for game messages, `:focus-visible` styles; the UI is checked against WCAG 2.1 AA with `vitest-axe` in CI
+- **Single-file bundling** — `node build-bundle.js` produces a standalone `2048.html` with all JS and CSS inlined, for embedding as an easter egg in other projects (the page shell is extracted from `index.html` at build time, so it can never drift from the real markup)
 - **ESLint 10 + Prettier 3** — modern flat config linting and formatting
 - **Undo** — take back up to 10 moves (button, **U** or **Ctrl/Cmd+Z**); history survives a reload
 - **Daily Challenge** — one seeded board per local calendar day, identical for every player on the same date, with its own best score
-- **Vitest test suite** — 140+ tests covering game logic, input, rendering, storage, sound and the seeded RNG
+- **Stats panel** — lifetime games played/won, win rate, best tile and best win streak, with undo-aware bookkeeping (a taken-back ending move is not counted)
+- **Shareable results** — after a win or a loss, one click copies the score, best tile and an emoji board to the clipboard
+- **Installable & offline** — a web app manifest and service worker make the served build installable as a PWA and playable offline after the first visit (the standalone bundle is already offline by construction)
+- **Vitest test suite** — 180+ tests covering game logic, input, rendering, storage, sound, themes, the seeded RNG, the PWA shell and accessibility; CI enforces coverage thresholds
 - **Namespaced localStorage** — keys are prefixed with `2048-` to avoid collisions on host pages
 
 ## Playing
@@ -25,12 +28,15 @@ npm start
 
 Then open http://localhost:8080 in your browser.
 
+The served page is installable as a PWA (browser install button in the address bar) and keeps working offline after the first visit.
+
 ### Controls
 
 - **Arrow keys** / **WASD** / **Vim keys (hjkl)** — move tiles
 - **R** — restart the game
 - **U** / **Ctrl+Z** / **Cmd+Z** — undo the last move
 - **Touch swipes** — move tiles on mobile devices
+- **Share** — after a win or a game over, copy the result (score, best tile, emoji board)
 
 ### Themes
 
@@ -80,23 +86,27 @@ npm install
 
 ### Available scripts
 
-| Script                 | Description                           |
-| ---------------------- | ------------------------------------- |
-| `npm start`            | Generate tile art, then serve on 8080 |
-| `npm run tiles`        | Generate Doodle tile SVGs in `build/` |
-| `npm run build`        | Generate the single-file `2048.html`  |
-| `npm run lint`         | Run ESLint                            |
-| `npm run lint:fix`     | Run ESLint with auto-fix              |
-| `npm run format`       | Format all files with Prettier        |
-| `npm run format:check` | Check formatting without writing      |
-| `npm test`             | Run the Vitest test suite             |
+| Script                 | Description                            |
+| ---------------------- | -------------------------------------- |
+| `npm start`            | Generate tile art, then serve on 8080  |
+| `npm run tiles`        | Generate Doodle tile SVGs in `build/`  |
+| `npm run icons`        | Regenerate the PWA icons in `meta/`    |
+| `npm run build`        | Generate the single-file `2048.html`   |
+| `npm run lint`         | Run ESLint                             |
+| `npm run lint:fix`     | Run ESLint with auto-fix               |
+| `npm run format`       | Format all files with Prettier         |
+| `npm run format:check` | Check formatting without writing       |
+| `npm test`             | Run the Vitest test suite              |
+| `npm run coverage`     | Run tests with the coverage thresholds |
 
 ### Project structure
 
 ```
 2048-mine/
-├── index.html              # Dev entry — loads 12 separate <script> tags
-├── build-bundle.js         # Single-file bundler (inlines JS + CSS)
+├── index.html              # Dev entry — loads 14 separate <script> tags
+├── manifest.webmanifest    # PWA install metadata
+├── sw.js                   # Service worker: offline shell (guarded by test/pwa.test.js)
+├── build-bundle.js         # Single-file bundler (shell extracted from index.html)
 ├── js/                     # Game source (plain scripts, shared global scope)
 │   ├── directions.js       # Shared direction contract (UP/RIGHT/DOWN/LEFT)
 │   ├── themes.js           # ThemeManager + 5 theme definitions
@@ -105,15 +115,18 @@ npm install
 │   ├── grid.js             # Grid model
 │   ├── tile.js             # Tile value object
 │   ├── local_storage_manager.js
+│   ├── stats.js            # StatsTracker (lifetime stats, undo-aware)
+│   ├── share.js            # ShareResult (emoji-board summary + clipboard)
 │   ├── sound_manager.js    # Opt-in Web Audio merge/win/lose sounds
 │   ├── view_transitions.js # View Transitions API wrapper
 │   ├── html_actuator.js    # DOM renderer
 │   ├── game_manager.js     # Controller: move/merge/win/lose logic
-│   └── application.js      # Bootstrap
+│   └── application.js      # Bootstrap (+ service worker registration)
 ├── style/                  # main.css (hand-maintained)
-├── test/                   # Vitest + jsdom test suite
-├── tools/                  # generate-tiles.mjs (Doodle SVG art → build/tiles/, gitignored)
-└── .github/workflows/ci.yml
+├── test/                   # Vitest + jsdom suite (incl. axe a11y + PWA drift guards)
+├── tools/                  # generate-tiles.mjs — Doodle SVG art → build/tiles/ (gitignored)
+│                           # make-icons.mjs — PWA icons → meta/icon-*.png (committed)
+└── .github/workflows/      # ci.yml (gate + coverage) and release.yml (tag → Release)
 ```
 
 ## Credits

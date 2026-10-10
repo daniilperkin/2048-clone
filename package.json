@@ -9,6 +9,7 @@
     "prestart": "node tools/generate-tiles.mjs",
     "build": "node build-bundle.js",
     "tiles": "node tools/generate-tiles.mjs",
+    "icons": "node tools/make-icons.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
