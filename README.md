@@ -54,6 +54,17 @@ node build-bundle.js
 
 This produces `2048.html` — a standalone file with all JavaScript and CSS inlined (Doodle tile SVGs embedded as data URIs; the build runs `tools/generate-tiles.mjs` first). The file is gitignored and should be regenerated at deploy time.
 
+## Releasing
+
+Tag a commit to publish the single-file bundle:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The Release workflow re-runs the full gate, builds `2048.html` and attaches it to a GitHub Release, so the gitignored bundle stays downloadable without a local build.
+
 ## Development
 
 ### Prerequisites
