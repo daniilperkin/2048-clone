@@ -5,8 +5,21 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    # One PR for all minor/patch bumps instead of one PR per package: every
+    # merged bump rewrites package-lock.json and invalidates the other open
+    # PRs (two needed rebases in a single backlog). Majors still arrive
+    # individually so breaking changes get a careful look.
+    groups:
+      npm-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    # Same rationale as the npm group above.
+    groups:
+      actions-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
