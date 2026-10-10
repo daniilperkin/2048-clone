@@ -158,7 +158,7 @@ class GameManager {
       this.storageManager.setGameState(this.serialize(), this.mode);
     }
 
-    this.actuator.actuate(this.grid, {
+    const metadata = {
       score: this.score,
       over: this.over,
       won: this.won,
@@ -167,7 +167,16 @@ class GameManager {
       canUndo: this.canUndo(),
       mode: this.mode,
       date: this.date,
-    });
+    };
+
+    // Inside a view-transition update phase the browser has paused rAF:
+    // render synchronously instead of waiting for a frame that can't come
+    // (see js/view_transitions.js). Moves keep the rAF-deferred path.
+    if (ViewTransitions.inUpdate && typeof this.actuator.renderNow === "function") {
+      this.actuator.renderNow(this.grid, metadata);
+    } else {
+      this.actuator.actuate(this.grid, metadata);
+    }
   }
 
   // Switch between Classic and the Daily Challenge. Each mode keeps its

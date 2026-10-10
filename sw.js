@@ -2,17 +2,20 @@
  * offline play after the first visit. The single-file bundle (2048.html)
  * is self-contained and never registers this worker.
  *
- * The doodle theme's tile SVGs (build/tiles/*.svg) are deliberately NOT
- * precached — they are generated assets that may be absent in a bare
- * deploy, and one missing file would fail the whole install. The fetch
- * handler caches them at runtime when the theme is used instead.
+ * Network-first: assets have no content-hash in their names, so serving
+ * from the network whenever it is reachable keeps `npm start` iterations
+ * fresh; the cache is the offline fallback and is refreshed on every
+ * successful fetch. The doodle theme's tile SVGs (build/tiles/*.svg) are
+ * deliberately NOT precached — they are generated assets that may be
+ * absent in a bare deploy, and one missing file would fail the whole
+ * install; they are cached at runtime when the theme is used.
  *
- * Bump CACHE_VERSION when shipping shell changes so returning visitors
- * pick up the new files.
+ * Bump CACHE_VERSION when shipping shell changes so browsers still on an
+ * older cache-first worker pick up the new files.
  */
 "use strict";
 
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const CACHE_NAME = `2048-shell-${CACHE_VERSION}`;
 
 // The boot shell — kept in sync with index.html by test/pwa.test.js.
@@ -63,24 +66,21 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Cache-first for same-origin GETs: the precached shell answers instantly
-// (and offline); anything else is cached as it is fetched.
+// Network-first for same-origin GETs; the cache answers when offline.
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
   if (new URL(request.url).origin !== self.location.origin) return;
 
   event.respondWith(
-    caches.match(request).then(
-      (hit) =>
-        hit ||
-        fetch(request).then((response) => {
-          if (response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          }
-          return response;
-        })
-    )
+    fetch(request)
+      .then((response) => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+        }
+        return response;
+      })
+      .catch(() => caches.match(request).then((hit) => hit || Response.error()))
   );
 });

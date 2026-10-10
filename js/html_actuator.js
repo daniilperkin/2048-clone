@@ -14,28 +14,37 @@ class HTMLActuator {
   }
 
   actuate(grid, metadata) {
-    window.requestAnimationFrame(() => {
-      this.clearContainer(this.tileContainer);
+    window.requestAnimationFrame(() => this.renderNow(grid, metadata));
+  }
 
-      grid.cells.forEach((column) => {
-        column.forEach((cell) => {
-          if (cell) this.addTile(cell);
-        });
+  /*
+   * The synchronous DOM work. actuate() defers this to the next frame;
+   * the view-transition update phase calls it directly, because rAF is
+   * paused while a transition's update callback is pending — waiting on
+   * a frame there makes Chromium abort the transition after its 4 s
+   * DOM-update timeout (see js/view_transitions.js).
+   */
+  renderNow(grid, metadata) {
+    this.clearContainer(this.tileContainer);
+
+    grid.cells.forEach((column) => {
+      column.forEach((cell) => {
+        if (cell) this.addTile(cell);
       });
-
-      this.updateScore(metadata.score);
-      this.updateBestScore(metadata.bestScore);
-      this.updateControls(metadata);
-      this.updateCells(grid);
-
-      if (metadata.terminated) {
-        if (metadata.over) {
-          this.message(false); // You lose
-        } else if (metadata.won) {
-          this.message(true); // You win!
-        }
-      }
     });
+
+    this.updateScore(metadata.score);
+    this.updateBestScore(metadata.bestScore);
+    this.updateControls(metadata);
+    this.updateCells(grid);
+
+    if (metadata.terminated) {
+      if (metadata.over) {
+        this.message(false); // You lose
+      } else if (metadata.won) {
+        this.message(true); // You win!
+      }
+    }
   }
 
   // Sync the Undo / Daily buttons with game state. Native `disabled` keeps
