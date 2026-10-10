@@ -99,6 +99,7 @@ class KeyboardInputManager {
     this.bindButtonPress(".keep-playing-button", this.keepPlaying);
     this.bindButtonPress(".undo-button", this.undo);
     this.bindButtonPress(".daily-button", this.toggleDaily);
+    this.bindButtonPress(".share-button", this.share);
 
     // Respond to swipe events
     let touchStartClientX, touchStartClientY;
@@ -162,6 +163,11 @@ class KeyboardInputManager {
   toggleDaily(event) {
     event.preventDefault();
     this.emit("toggleDaily");
+  }
+
+  share(event) {
+    event.preventDefault();
+    this.emit("share");
   }
 
   keepPlaying(event) {

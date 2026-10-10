@@ -1,5 +1,5 @@
 /* exported GameManager */
-/* global Grid, Tile, SeededRandom, themeManager, DIRECTIONS, soundManager, ViewTransitions, StatsTracker */
+/* global Grid, Tile, SeededRandom, themeManager, DIRECTIONS, soundManager, ViewTransitions, StatsTracker, ShareResult */
 class GameManager {
   constructor(size, InputManager, Actuator, StorageManager) {
     this.size = size; // Size of the grid
@@ -29,6 +29,7 @@ class GameManager {
     this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
     this.inputManager.on("undo", this.undo.bind(this));
     this.inputManager.on("toggleDaily", this.toggleDaily.bind(this));
+    this.inputManager.on("share", this.share.bind(this));
 
     themeManager.onChange((theme) => {
       this.winThreshold = theme.winThreshold;
@@ -177,6 +178,21 @@ class GameManager {
       if (this.storageManager.setMode) this.storageManager.setMode(this.mode);
       this.actuator.continueGame();
       this.setup();
+    });
+  }
+
+  // Copy the result summary (see js/share.js) and flash feedback on the
+  // overlay's Share button. Clipboard writes are async and may be denied;
+  // the actuator reports either outcome.
+  share() {
+    const text = ShareResult.buildText({
+      grid: this.grid,
+      score: this.score,
+      mode: this.mode,
+      date: this.date,
+    });
+    ShareResult.copy(text).then((copied) => {
+      if (this.actuator.shareFeedback) this.actuator.shareFeedback(copied);
     });
   }
 

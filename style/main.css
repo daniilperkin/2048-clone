@@ -1212,3 +1212,32 @@ body[data-theme="doodle"] .stats-list dt {
 .above-game-controls {
   flex-wrap: wrap;
 }
+
+/* ─── Share button ───────────────────────────────────────────────
+ * Lives in the game-message overlay, so it appears exactly when a game
+ * ended. Styled like the overlay's links but as a real <button>. */
+.game-container .game-message .share-button {
+  display: inline-block;
+  background: #776e65;
+  border: none;
+  border-radius: 3px;
+  padding: 0 20px;
+  color: #f9f6f2;
+  height: 40px;
+  margin-left: 9px;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+.game-message .share-button:focus-visible {
+  outline: 3px solid #f67c5f;
+  outline-offset: 2px;
+}
+body[data-theme="doodle"] .game-container .game-message .share-button {
+  background: #d9cdb4;
+  color: #3b352c;
+}
+body[data-theme="doodle"] .game-message .share-button:focus-visible {
+  outline: 3px solid #8f6a2c;
+}

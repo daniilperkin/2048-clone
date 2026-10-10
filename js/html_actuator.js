@@ -8,6 +8,7 @@ class HTMLActuator {
     this.messageContainer = document.querySelector(".game-message");
     this.undoButton = document.querySelector(".undo-button");
     this.dailyButton = document.querySelector(".daily-button");
+    this.shareButton = document.querySelector(".share-button");
 
     this.score = 0;
   }
@@ -70,6 +71,23 @@ class HTMLActuator {
           : `row ${y + 1} column ${x + 1}, empty`
       );
     });
+  }
+
+  // Brief feedback on the Share button: swap the visible label and the
+  // accessible name, then restore both after a moment. Only the latest
+  // attempt wins — a new copy supersedes a pending revert.
+  shareFeedback(copied) {
+    if (!this.shareButton) return;
+    clearTimeout(this.shareTimer);
+    this.shareButton.textContent = copied ? "Copied!" : "Copy failed";
+    this.shareButton.setAttribute(
+      "aria-label",
+      copied ? "Result copied to clipboard" : "Could not copy result"
+    );
+    this.shareTimer = setTimeout(() => {
+      this.shareButton.textContent = "Share";
+      this.shareButton.setAttribute("aria-label", "Share result");
+    }, 1500);
   }
 
   // Continues the game (both restart and keep playing)
