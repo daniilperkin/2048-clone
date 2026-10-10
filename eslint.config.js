@@ -74,6 +74,7 @@ export default [
         Tile: "readonly",
         Grid: "readonly",
         LocalStorageManager: "readonly",
+        StatsTracker: "readonly",
         ThemeManager: "readonly",
         themeManager: "readonly",
         ViewTransitions: "readonly",

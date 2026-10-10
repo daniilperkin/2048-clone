@@ -34,6 +34,7 @@ const JS_FILES = [
   "js/random.js",
   "js/grid.js",
   "js/local_storage_manager.js",
+  "js/stats.js",
   "js/html_actuator.js",
   "js/game_manager.js",
   "js/application.js",

@@ -1,5 +1,5 @@
 /* exported GameManager */
-/* global Grid, Tile, SeededRandom, themeManager, DIRECTIONS, soundManager, ViewTransitions */
+/* global Grid, Tile, SeededRandom, themeManager, DIRECTIONS, soundManager, ViewTransitions, StatsTracker */
 class GameManager {
   constructor(size, InputManager, Actuator, StorageManager) {
     this.size = size; // Size of the grid
@@ -10,6 +10,11 @@ class GameManager {
     // Hand the shared sound instance its storage manager so the player's
     // mute preference is read on boot and written on every change.
     soundManager.attachStorage(this.storageManager);
+
+    // Lifetime stats (finished games only) — see js/stats.js. The previous
+    // numbers are kept alongside the undo snapshots so taking back the move
+    // that ended a game also rolls the record back.
+    this.stats = new StatsTracker(this.storageManager);
 
     this.startTiles = 2;
     this.winThreshold = themeManager.get().winThreshold;
@@ -57,8 +62,8 @@ class GameManager {
     this.keepPlayingEnabled = true;
     // Persist the new state so the win overlay doesn't reappear on
     // refresh before the next move. actuate() serializes (with
-    // keepPlayingEnabled now true) and re-renders; continueGame()
-    // clears the overlay immediately.
+    // keepPlayingEnabled now true) and re-renders; continueGame() clears
+    // the overlay immediately.
     this.actuate();
     this.actuator.continueGame();
   }
@@ -106,6 +111,8 @@ class GameManager {
     this.over = false;
     this.won = false;
     this.keepPlayingEnabled = false;
+    // No outcome recorded for this game yet (non-null once one is).
+    this.statsPrevious = null;
     this.addStartTiles();
   }
 
@@ -115,6 +122,7 @@ class GameManager {
     this.over = s.over;
     this.won = s.won;
     this.keepPlayingEnabled = s.keepPlayingEnabled || s.keepPlaying || false;
+    this.statsPrevious = s.statsPrevious || null;
     this.rng = this.mode === "daily" ? new SeededRandom(s.rngState) : null;
   }
 
@@ -180,6 +188,7 @@ class GameManager {
       over: this.over,
       won: this.won,
       keepPlayingEnabled: this.keepPlayingEnabled,
+      statsPrevious: this.statsPrevious,
       mode: this.mode,
       date: this.date,
       rngState: this.rng ? this.rng.state : null,
@@ -196,6 +205,7 @@ class GameManager {
       over: this.over,
       won: this.won,
       keepPlayingEnabled: this.keepPlayingEnabled,
+      statsPrevious: this.statsPrevious,
       rngState: this.rng ? this.rng.state : null,
     };
   }
@@ -209,7 +219,12 @@ class GameManager {
   undo() {
     const snap = this.history.pop();
     if (!snap) return;
+    // If this undo crosses the moment the game ended, the stats recorded
+    // for that ending must come back out: the snapshot predates the
+    // recording (statsPrevious was still null when it was taken).
+    const rollback = this.statsPrevious && !snap.statsPrevious ? this.statsPrevious : null;
     this.applySnapshot(snap);
+    if (rollback) this.stats.restore(rollback);
     this.actuator.continueGame(); // Clear a win/lose overlay
     this.actuate();
   }
@@ -307,8 +322,30 @@ class GameManager {
         soundManager.move();
       }
 
+      this.recordOutcomeIfEnded();
+
       this.actuate();
     }
+  }
+
+  // Count a finished game exactly once, at the moment it first ends, so a
+  // win that continues via "Keep going" is not counted twice. Theme
+  // switches that flip the win state are deliberately not counted — they
+  // are not moves, and counting them would let threshold changes farm wins.
+  recordOutcomeIfEnded() {
+    if (this.statsPrevious) return; // already counted for this game
+    if (this.over || this.won) {
+      this.statsPrevious = this.stats.record(this.won, this.bestTileValue());
+    }
+  }
+
+  // Highest tile on the board — the "best tile" recorded at game end.
+  bestTileValue() {
+    let best = 0;
+    this.grid.eachCell((_x, _y, tile) => {
+      if (tile && tile.value > best) best = tile.value;
+    });
+    return best;
   }
 
   // Get the vector representing the chosen direction

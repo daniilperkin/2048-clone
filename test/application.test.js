@@ -56,4 +56,28 @@ describe("application bootstrap", () => {
     toggle.click();
     expect(toggle.getAttribute("aria-pressed")).toBe("false");
   });
+
+  it("stats panel opens, renders the stored numbers, and closes", () => {
+    localStorage.setItem(
+      "2048-stats",
+      JSON.stringify({ played: 4, won: 1, bestTile: 128, streak: 0, bestStreak: 1 })
+    );
+    loadApplication();
+    const button = document.querySelector(".stats-button");
+    const panel = document.querySelector(".stats-panel");
+    expect(panel.hasAttribute("hidden")).toBe(true);
+
+    button.click();
+    expect(panel.hasAttribute("hidden")).toBe(false);
+    expect(button.getAttribute("aria-expanded")).toBe("true");
+    expect(panel.querySelector(".stat-played").textContent).toBe("4");
+    expect(panel.querySelector(".stat-won").textContent).toBe("1");
+    expect(panel.querySelector(".stat-rate").textContent).toBe("25%");
+    expect(panel.querySelector(".stat-best-tile").textContent).toBe("128");
+    expect(panel.querySelector(".stat-best-streak").textContent).toBe("1");
+
+    button.click();
+    expect(panel.hasAttribute("hidden")).toBe(true);
+    expect(button.getAttribute("aria-expanded")).toBe("false");
+  });
 });

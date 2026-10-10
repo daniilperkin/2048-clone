@@ -1125,9 +1125,10 @@ body[data-theme="doodle"] .sound-toggle:focus-visible {
   }
 }
 
-/* Undo and Daily Challenge controls share the sound toggle's shape. */
+/* Undo, Daily Challenge and Stats controls share the sound toggle's shape. */
 .undo-button,
-.daily-button {
+.daily-button,
+.stats-button {
   flex: 0 0 auto;
   height: 40px;
   padding: 0 12px;
@@ -1144,29 +1145,70 @@ body[data-theme="doodle"] .sound-toggle:focus-visible {
   opacity: 0.55;
   cursor: not-allowed;
 }
-.daily-button[aria-pressed="true"] {
+.daily-button[aria-pressed="true"],
+.stats-button[aria-expanded="true"] {
   box-shadow: inset 0 -4px 0 #f67c5f;
 }
 .undo-button:focus-visible,
-.daily-button:focus-visible {
+.daily-button:focus-visible,
+.stats-button:focus-visible {
   outline: 3px solid #f67c5f;
   outline-offset: 2px;
 }
 body[data-theme="doodle"] .undo-button,
-body[data-theme="doodle"] .daily-button {
+body[data-theme="doodle"] .daily-button,
+body[data-theme="doodle"] .stats-button {
   background: #d9cdb4;
   color: #3b352c;
   border-radius: 4px;
 }
 body[data-theme="doodle"] .undo-button:focus-visible,
-body[data-theme="doodle"] .daily-button:focus-visible {
+body[data-theme="doodle"] .daily-button:focus-visible,
+body[data-theme="doodle"] .stats-button:focus-visible {
   outline: 3px solid #8f6a2c;
 }
 body.daily-mode .best-container:after {
   content: "Daily best";
 }
 
-/* Five controls no longer fit one row on narrow screens. */
+/* Stats panel: a card under the controls, toggled by the Stats button.
+ * [hidden] must win over any display rule for the closed state. */
+.stats-panel {
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: #eee4da;
+  border-radius: 3px;
+}
+.stats-panel[hidden] {
+  display: none;
+}
+.stats-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin: 0;
+}
+.stats-list .stat {
+  display: flex;
+  gap: 6px;
+}
+.stats-list dt {
+  color: #776e65;
+}
+.stats-list dd {
+  margin: 0;
+  font-weight: bold;
+}
+body[data-theme="doodle"] .stats-panel {
+  background: #e8e0cf;
+  color: #3b352c;
+  border-radius: 4px;
+}
+body[data-theme="doodle"] .stats-list dt {
+  color: rgba(59, 53, 44, 0.7);
+}
+
+/* Six controls no longer fit one row on narrow screens. */
 .above-game-controls {
   flex-wrap: wrap;
 }

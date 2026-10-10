@@ -28,6 +28,7 @@ class LocalStorageManager {
     this.gameStateKey = "2048-game-state";
     this.soundKey = "2048-sound";
     this.modeKey = "2048-mode";
+    this.statsKey = "2048-stats";
     // Daily Challenge keeps its own save and best score so it never
     // touches the Classic record.
     this.dailyBestKey = "2048-daily-best";
@@ -120,5 +121,26 @@ class LocalStorageManager {
 
   setSoundEnabled(enabled) {
     this.storage.setItem(this.soundKey, enabled ? "1" : "0");
+  }
+
+  // Lifetime stats for finished games (see js/stats.js). Stored as JSON;
+  // corrupted data reads as a fresh record instead of crashing.
+  getStats() {
+    const raw = this.storage.getItem(this.statsKey);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch (error) {
+      this.storage.removeItem(this.statsKey);
+      return null;
+    }
+  }
+
+  setStats(stats) {
+    try {
+      this.storage.setItem(this.statsKey, JSON.stringify(stats));
+    } catch (error) {
+      // Quota exceeded or storage disabled — silently drop the update
+    }
   }
 }
