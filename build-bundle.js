@@ -6,6 +6,12 @@
  * Usage:  node build-bundle.js
  * Output: 2048.html  (in the repo root)
  *
+ * The page shell (the <body> markup) is extracted from index.html — the
+ * single source of truth — so a control added there can never be silently
+ * missing from the bundle. The <head> stays hand-written here because the
+ * bundle must not reference external files (favicon, apple-touch icons),
+ * and the CSS/JS are replaced by inlined copies.
+ *
  * The generated file is what gets copied into SPRINTSTART's
  * public/easter-eggs/ folder — one file, no external requests.
  */
@@ -13,7 +19,7 @@
 import fs from "fs";
 import path from "path";
 import { execFileSync } from "child_process";
-import { fileURLToPath } from "url";
+import { fileURLToPath, pathToFileURL } from "url";
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 
@@ -34,7 +40,7 @@ const JS_FILES = [
 ];
 
 // ─── JS: strip ESLint directives, concat ──────────────────────
-function bundleJs() {
+export function bundleJs() {
   return JS_FILES.map((rel) => {
     const fullPath = path.join(ROOT, rel);
     let src = fs.readFileSync(fullPath, "utf8");
@@ -47,7 +53,7 @@ function bundleJs() {
 }
 
 // ─── CSS: strip vendor prefixes, drop @import, system fonts ───
-function bundleCss() {
+export function bundleCss() {
   const cssPath = path.join(ROOT, "style", "main.css");
   let css = fs.readFileSync(cssPath, "utf8");
 
@@ -96,10 +102,30 @@ function bundleCss() {
   return css.trim();
 }
 
+// ─── Shell: the page markup comes from index.html ─────────────
+export function extractShell() {
+  const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
+  const match = html.match(/<body>([\s\S]*)<\/body>/);
+  if (!match) throw new Error("index.html has no <body> — cannot extract the bundle shell");
+
+  // Drop the <script src> tags: the bundle replaces them with one inline
+  // <script>. Everything else (noscript, controls, board) ships verbatim.
+  const shell = match[1].replace(/[ \t]*<script[\s\S]*?<\/script>\s*/g, "").trim();
+
+  // One file, zero network requests: any external reference is a hard
+  // failure here rather than a silent 404 at runtime.
+  const external = shell.match(/(?:src|href)="(?!data:|#)[^"]*"/g);
+  if (external) {
+    throw new Error(`Shell would reference external files: ${external.join(", ")}`);
+  }
+  return shell;
+}
+
 // ─── HTML: the shell with inlined <style> and <script> ────────
-function buildHtml() {
+export function buildHtml() {
   const js = bundleJs();
   const css = bundleCss();
+  const shell = extractShell();
 
   return `<!doctype html>
 <html lang="en">
@@ -112,67 +138,7 @@ ${css}
     </style>
   </head>
   <body>
-    <noscript>
-      <p style="text-align: center; margin: 2em; font-family: system-ui, sans-serif">
-        2048 requires JavaScript to run. Please enable JavaScript in your browser
-        settings to play.
-      </p>
-    </noscript>
-    <div class="container">
-      <div class="heading">
-        <div class="scores-container" role="group" aria-label="Scores">
-          <div class="score-container" role="status" aria-label="Current score">0</div>
-          <div class="best-container" role="status" aria-label="Best score">0</div>
-        </div>
-      </div>
-
-      <div class="above-game">
-        <div class="above-game-controls">
-          <select class="theme-select" aria-label="Change tile theme"></select>
-          <button class="sound-toggle" type="button" aria-pressed="false" aria-label="Sound effects"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M4 9h3.2L11.5 6v12L7.2 15H4z" fill="currentColor"/><path class="sound-waves" d="M15.2 8.6a5 5 0 0 1 0 6.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="sound-slash" d="M4.5 19.5 19.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-          <a class="restart-button" href="#" role="button" aria-label="Start a new game">New Game</a>
-        </div>
-      </div>
-
-      <div class="game-container" role="grid" aria-label="2048 game board">
-        <div class="game-message" role="alert" aria-live="assertive" aria-atomic="true">
-          <p></p>
-          <div class="lower">
-            <a class="keep-playing-button" href="#" role="button" aria-label="Keep playing after winning">Keep going</a>
-            <a class="retry-button" href="#" role="button" aria-label="Start a new game">Try again</a>
-          </div>
-        </div>
-
-        <div class="grid-container">
-          <div class="grid-row" role="row">
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-          </div>
-          <div class="grid-row" role="row">
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-          </div>
-          <div class="grid-row" role="row">
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-          </div>
-          <div class="grid-row" role="row">
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-          </div>
-        </div>
-
-        <div class="tile-container"></div>
-      </div>
-    </div>
+${shell}
 
     <script>
 ${js}
@@ -182,16 +148,24 @@ ${js}
 `;
 }
 
-// The doodle theme's tile art is generated, not committed — regenerate it
-// before every bundle so `npm run build` is self-contained and the art can
-// never lag behind the palette in tools/tile-art.config.mjs.
-execFileSync(process.execPath, [path.join(ROOT, "tools", "generate-tiles.mjs")], {
-  stdio: "inherit",
-});
+export function main() {
+  // The doodle theme's tile art is generated, not committed — regenerate it
+  // before every bundle so `npm run build` is self-contained and the art can
+  // never lag behind the palette in tools/tile-art.config.mjs.
+  execFileSync(process.execPath, [path.join(ROOT, "tools", "generate-tiles.mjs")], {
+    stdio: "inherit",
+  });
 
-const html = buildHtml();
-const outPath = path.join(ROOT, "2048.html");
-fs.writeFileSync(outPath, html, "utf8");
+  const html = buildHtml();
+  const outPath = path.join(ROOT, "2048.html");
+  fs.writeFileSync(outPath, html, "utf8");
 
-const sizeKb = (Buffer.byteLength(html, "utf8") / 1024).toFixed(1);
-console.log(`✓ Built 2048.html (${sizeKb} KB)`);
+  const sizeKb = (Buffer.byteLength(html, "utf8") / 1024).toFixed(1);
+  console.log(`✓ Built 2048.html (${sizeKb} KB)`);
+}
+
+// Run only when executed directly (`node build-bundle.js`); importing the
+// functions from tests must not trigger a build.
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  main();
+}

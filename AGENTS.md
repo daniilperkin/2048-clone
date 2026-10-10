@@ -19,7 +19,10 @@ dependency order (the lists currently differ in order; `test/setup.js` omits
 `js/application.js`): `index.html`, `JS_FILES` in `build-bundle.js`, and
 `GAME_FILES` in `test/setup.js` (plus `GLOBAL_CLASSES` there if tests need to reach its class or instance).
 
-`build-bundle.js` also carries its own hand-written copy of the page shell
-(heading, controls, game container). Markup added to `index.html` - buttons,
-containers, ARIA regions - must be mirrored in that template, or the bundled
-`2048.html` silently ships without it (the JS null-guards missing elements).
+`build-bundle.js` extracts the page shell (the `<body>` markup) from
+`index.html` at build time — `index.html` is the single source of truth, so a
+control added there reaches the bundle automatically. The bundle's `<head>` is
+hand-written and must stay free of external references (favicon, apple-touch
+icons, manifest). `test/bundle.test.js` guards both properties: every class
+used in `index.html`'s body must appear in the built shell, and the shell must
+make no external requests.
