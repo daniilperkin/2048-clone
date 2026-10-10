@@ -7,16 +7,22 @@ loadGameFiles();
  * HTMLActuator tests — jsdom with a minimal game-board skeleton.
  *
  * HTMLActuator queries .tile-container / .score-container /
- * .best-container / .game-message at construction time, so we build
- * that DOM before each test. window.requestAnimationFrame is faked to
- * run synchronously (jsdom has no rendering loop).
+ * .best-container / .game-message at construction time and labels the
+ * .grid-container cells at actuate time, so we build that DOM before each
+ * test. window.requestAnimationFrame is faked to run synchronously (jsdom
+ * has no rendering loop).
  */
 function buildBoardDom() {
+  const rows = Array.from(
+    { length: 4 },
+    () => `<div class="grid-row">${'<div class="grid-cell"></div>'.repeat(4)}</div>`
+  ).join("");
   document.body.innerHTML = `
     <div class="score-container">0</div>
     <div class="best-container">0</div>
     <div class="tile-container"></div>
     <div class="game-message"><p></p></div>
+    <div class="grid-container">${rows}</div>
   `;
 }
 
@@ -96,31 +102,43 @@ describe("HTMLActuator", () => {
     });
   });
 
-  describe("addTile via actuate", () => {
-    it("exposes each tile to assistive technology", () => {
+  describe("board accessibility (cells carry state, tiles are visual)", () => {
+    it("labels the occupied cell and hides the duplicate tile from AT", () => {
       const tile = new Tile({ x: 1, y: 2 }, 8);
       const grid = new Grid(4);
       grid.insertTile(tile);
 
       actuator.actuate(grid, { score: 0, bestScore: 0, terminated: false });
 
-      const cell = document.querySelector('.tile-container [role="gridcell"]');
-      expect(cell).not.toBeNull();
-      // Label carries the theme's label for the value + 1-indexed
-      // row/column so AT users get position, not just content.
+      // The accessible board is the cell; it announces content + position.
+      const cells = document.querySelectorAll(".grid-container .grid-cell");
       const expected = `${globalThis.themeManager.getLabel(8)}, row 3 column 2`;
-      expect(cell.getAttribute("aria-label")).toBe(expected);
+      expect(cells[2 * 4 + 1].getAttribute("aria-label")).toBe(expected);
+      // Empty cells are announced as empty rather than silent.
+      expect(cells[0].getAttribute("aria-label")).toBe("row 1 column 1, empty");
+      // The visual tile is a duplicate and stays out of the a11y tree.
+      const wrapper = document.querySelector(".tile-container .tile");
+      expect(wrapper.getAttribute("aria-hidden")).toBe("true");
+      expect(wrapper.hasAttribute("role")).toBe(false);
     });
 
-    it("labels tiles with the theme label, not raw values", () => {
+    it("labels cells with the theme label, not raw values", () => {
       const grid = new Grid(4);
       grid.insertTile(new Tile({ x: 0, y: 0 }, 2048));
 
       actuator.actuate(grid, { score: 0, bestScore: 0, terminated: false });
 
-      const cell = document.querySelector('[role="gridcell"]');
+      const cell = document.querySelector(".grid-container .grid-cell");
       const expectedLabel = globalThis.themeManager.getLabel(2048);
       expect(cell.getAttribute("aria-label")).toContain(expectedLabel);
+    });
+
+    it("is a no-op when the markup has no grid cells (older fixtures)", () => {
+      document.querySelector(".grid-container").remove();
+      const grid = new Grid(4);
+      expect(() =>
+        actuator.actuate(grid, { score: 0, bestScore: 0, terminated: false })
+      ).not.toThrow();
     });
   });
 

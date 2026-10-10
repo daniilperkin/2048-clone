@@ -25,6 +25,7 @@ class HTMLActuator {
       this.updateScore(metadata.score);
       this.updateBestScore(metadata.bestScore);
       this.updateControls(metadata);
+      this.updateCells(grid);
 
       if (metadata.terminated) {
         if (metadata.over) {
@@ -49,6 +50,26 @@ class HTMLActuator {
         daily ? `Daily best score for ${metadata.date}` : "Best score"
       );
     }
+  }
+
+  // The accessible board is the 4x4 grid of cells (role="gridcell"); the
+  // absolutely-positioned tiles are a visual duplicate and are aria-hidden.
+  // Each cell announces its content plus 1-indexed row/column, so screen
+  // reader grid navigation reads the real board state — including empties.
+  updateCells(grid) {
+    const cells = document.querySelectorAll(".grid-container .grid-row .grid-cell");
+    if (cells.length === 0) return; // minimal test fixtures / older markup
+    cells.forEach((cell, index) => {
+      const x = index % grid.size;
+      const y = Math.floor(index / grid.size);
+      const tile = grid.cells[x] && grid.cells[x][y];
+      cell.setAttribute(
+        "aria-label",
+        tile
+          ? `${this.themeManager.getLabel(tile.value)}, row ${y + 1} column ${x + 1}`
+          : `row ${y + 1} column ${x + 1}, empty`
+      );
+    });
   }
 
   // Continues the game (both restart and keep playing)
@@ -81,11 +102,10 @@ class HTMLActuator {
     inner.style.color = colors.fg;
     inner.style.setProperty("--tile-font-size", `${this.fontSizeForLabel(label)}px`);
 
-    // Expose the tile to assistive tech: the board container is not
-    // aria-hidden, so each tile announces its value and grid position
-    // (e.g. "8, row 2 column 3") instead of being invisible silence.
-    wrapper.setAttribute("role", "gridcell");
-    wrapper.setAttribute("aria-label", `${label}, row ${position.y + 1} column ${position.x + 1}`);
+    // The tile is the visual layer only — the accessible board state lives
+    // on the grid's cells (see updateCells). Hide the duplicate from AT so
+    // a screen reader hears each cell once, not the cell plus its tile.
+    wrapper.setAttribute("aria-hidden", "true");
 
     if (tile.previousPosition) {
       // Make sure that the tile gets rendered in the previous position first
