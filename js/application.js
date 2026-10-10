@@ -65,4 +65,15 @@ window.requestAnimationFrame(() => {
       statsButton.setAttribute("aria-expanded", String(opening));
     });
   }
+
+  // Offline support: register the service worker for the multi-file build.
+  // Skipped in the single-file bundle (its <head> carries no manifest link)
+  // and on file:// where service workers are unavailable.
+  if (document.querySelector('link[rel="manifest"]') && "serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(() => {
+        // Offline play is a progressive enhancement — ignore failures.
+      });
+    });
+  }
 });

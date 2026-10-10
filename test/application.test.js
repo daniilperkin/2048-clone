@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { loadGameFiles, loadApplication } from "./setup.js";
@@ -79,5 +79,20 @@ describe("application bootstrap", () => {
     button.click();
     expect(panel.hasAttribute("hidden")).toBe(true);
     expect(button.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("registers the service worker when the manifest is linked", () => {
+    const register = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "serviceWorker", {
+      value: { register },
+      configurable: true,
+    });
+    document.head.insertAdjacentHTML(
+      "beforeend",
+      '<link rel="manifest" href="manifest.webmanifest">'
+    );
+    loadApplication();
+    window.dispatchEvent(new Event("load"));
+    expect(register).toHaveBeenCalledWith("sw.js");
   });
 });

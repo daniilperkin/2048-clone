@@ -1,0 +1,15 @@
+{
+  "name": "2048 — Modernized Classic",
+  "short_name": "2048",
+  "description": "The classic 2048 sliding-tile game: five themes, undo, daily challenge, sound and offline play.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf8ef",
+  "theme_color": "#faf8ef",
+  "icons": [
+    { "src": "meta/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "meta/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
