@@ -72,4 +72,34 @@ describe("WCAG 2.1 AA (axe)", () => {
     const results = await axe(document.body, AXE_OPTIONS);
     expect(results).toHaveNoViolations();
   });
+
+  it("game-over overlay with the run summary has no violations", async () => {
+    loadApplication();
+    const actuator = new HTMLActuator(themeManager);
+    actuator.message(false, {
+      score: 1234,
+      moves: 87,
+      elapsed: "07:42",
+      bestTile: 512,
+      newBest: true,
+    });
+    const results = await axe(document.body, AXE_OPTIONS);
+    expect(results).toHaveNoViolations();
+  });
+
+  it("dark mode has no violations", async () => {
+    loadApplication();
+    preferences.set("dark", true);
+    const results = await axe(document.body, AXE_OPTIONS);
+    preferences.set("dark", false);
+    expect(results).toHaveNoViolations();
+  });
+
+  it("open panels have no violations", async () => {
+    loadApplication();
+    document.querySelector(".settings-button").click();
+    document.querySelector(".stats-button").click(); // opening one closes the other
+    const results = await axe(document.body, AXE_OPTIONS);
+    expect(results).toHaveNoViolations();
+  });
 });

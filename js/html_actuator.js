@@ -45,9 +45,9 @@ class HTMLActuator {
 
     if (metadata.terminated) {
       if (metadata.over) {
-        this.message(false); // You lose
+        this.message(false, metadata); // You lose
       } else if (metadata.won) {
-        this.message(true); // You win!
+        this.message(true, metadata); // You win!
       }
     }
   }
@@ -101,6 +101,19 @@ class HTMLActuator {
     if (this.timerContainer && text !== undefined) {
       this.timerContainer.textContent = text;
     }
+  }
+
+  // Feedback for a move that changed nothing (see GameManager.move):
+  // a short board shake. Reduced motion turns the animation off in CSS.
+  shake() {
+    const target = this.tileContainer || document.querySelector(".game-container");
+    if (!target) return;
+    target.classList.remove("board-shake");
+    // Force a reflow so a rapid second invalid move restarts the animation.
+    target.getBoundingClientRect();
+    target.classList.add("board-shake");
+    clearTimeout(this.shakeTimer);
+    this.shakeTimer = setTimeout(() => target.classList.remove("board-shake"), 220);
   }
 
   // Opt-in celebration (see js/preferences.js): a confetti burst plus a
@@ -266,19 +279,44 @@ class HTMLActuator {
     this.bestContainer.textContent = bestScore;
   }
 
-  message(won) {
+  message(won, metadata) {
     const type = won ? "game-won" : "game-over";
     const message = won ? "You win!" : "Game over!";
 
     this.messageContainer.classList.add(type);
     const messageParagraph = this.messageContainer.getElementsByTagName("p")[0];
     messageParagraph.textContent = message;
+    this.renderRunDetails(metadata);
     // Ensure the live region re-announces even if the message text is
     // identical to a previous announcement (e.g. game over twice in a row).
     this.messageContainer.setAttribute("aria-live", "assertive");
   }
 
+  // The end overlay carries the run's numbers, not just the verdict:
+  // score, moves, clock and best tile, plus a "New best!" chip when this
+  // run beat everything before it. Metadata may be missing in older
+  // callers (tests, older fixtures) — then the details stay empty.
+  renderRunDetails(metadata) {
+    const details = this.messageContainer.querySelector(".run-details");
+    const chip = this.messageContainer.querySelector(".new-best-chip");
+    if (details) {
+      if (metadata) {
+        const tile = metadata.bestTile ? this.themeManager.getLabel(metadata.bestTile) : "—";
+        details.textContent = `Score ${metadata.score} · ${metadata.moves || 0} moves · ${
+          metadata.elapsed || "00:00"
+        } · best tile ${tile}`;
+      } else {
+        details.textContent = "";
+      }
+    }
+    if (chip) chip.hidden = !(metadata && metadata.newBest);
+  }
+
   clearMessage() {
     this.messageContainer.classList.remove("game-won", "game-over");
+    const details = this.messageContainer.querySelector(".run-details");
+    if (details) details.textContent = "";
+    const chip = this.messageContainer.querySelector(".new-best-chip");
+    if (chip) chip.hidden = true;
   }
 }

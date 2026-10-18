@@ -119,6 +119,23 @@ class SoundManager {
       });
     });
   }
+
+  /** Rising four-note fanfare when a game is won. */
+  win() {
+    [523.25, 659.25, 783.99, 1046.5].forEach((freq, index) => {
+      this.tone(freq, {
+        delay: index * 0.11,
+        duration: 0.26,
+        gain: 0.05,
+        glide: 1.01,
+      });
+    });
+  }
+
+  /** Soft downward tick when a move is taken back. */
+  undo() {
+    this.tone(330, { duration: 0.09, gain: 0.03, type: "sine", glide: 0.75 });
+  }
 }
 
 /** Single shared instance: the UI toggle and the game must agree. */

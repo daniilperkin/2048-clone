@@ -114,6 +114,9 @@ class GameManager {
     this.moves = 0;
     this.startedAt = Date.now();
     this.endedAt = null;
+    // The best score the game began with, so the end overlay can say
+    // "New best!" only when this run actually beat it (see actuate()).
+    this.bestAtStart = this.storageManager.getBestScore(this.mode, this.date);
     this.over = false;
     this.won = false;
     this.keepPlayingEnabled = false;
@@ -128,6 +131,12 @@ class GameManager {
     this.moves = s.moves || 0;
     this.startedAt = typeof s.startedAt === "number" ? s.startedAt : Date.now();
     this.endedAt = typeof s.endedAt === "number" ? s.endedAt : null;
+    // Saves from before the field existed fall back to the stored best —
+    // the chip then simply requires beating the current record.
+    this.bestAtStart =
+      typeof s.bestAtStart === "number"
+        ? s.bestAtStart
+        : this.storageManager.getBestScore(this.mode, this.date);
     this.over = s.over;
     this.won = s.won;
     this.keepPlayingEnabled = s.keepPlayingEnabled || s.keepPlaying || false;
@@ -177,6 +186,8 @@ class GameManager {
       date: this.date,
       moves: this.moves,
       elapsed: GameManager.formatElapsed(this.elapsedMs()),
+      bestTile: this.bestTileValue(),
+      newBest: this.score > this.bestAtStart,
     };
 
     // Inside a view-transition update phase the browser has paused rAF:
@@ -223,6 +234,7 @@ class GameManager {
       moves: this.moves,
       startedAt: this.startedAt,
       endedAt: this.endedAt,
+      bestAtStart: this.bestAtStart,
       over: this.over,
       won: this.won,
       keepPlayingEnabled: this.keepPlayingEnabled,
@@ -243,6 +255,7 @@ class GameManager {
       moves: this.moves,
       startedAt: this.startedAt,
       endedAt: this.endedAt,
+      bestAtStart: this.bestAtStart,
       over: this.over,
       won: this.won,
       keepPlayingEnabled: this.keepPlayingEnabled,
@@ -266,6 +279,7 @@ class GameManager {
     const rollback = this.statsPrevious && !snap.statsPrevious ? this.statsPrevious : null;
     this.applySnapshot(snap);
     if (rollback) this.stats.restore(rollback);
+    soundManager.undo();
     this.actuator.continueGame(); // Clear a win/lose overlay
     this.actuate();
   }
@@ -360,10 +374,13 @@ class GameManager {
         this.endedAt = Date.now();
       }
 
-      // Sound follows the move that just happened: the game-over motif
-      // replaces the merge/move blips rather than layering on top of them.
+      // Sound follows the move that just happened: a win gets its own
+      // motif, and the game-over motif replaces the merge/move blips
+      // rather than layering on top of them.
       if (this.over) {
         soundManager.gameOver();
+      } else if (this.won && !this.keepPlayingEnabled) {
+        soundManager.win();
       } else if (mergedValues.length > 0) {
         soundManager.merge(mergedValues);
       } else {
@@ -373,6 +390,19 @@ class GameManager {
       this.recordOutcomeIfEnded();
 
       this.actuate();
+    } else {
+      // A move that changed nothing still deserves feedback: a short board
+      // shake (CSS) and a haptic tick where the device supports it. Both
+      // are suppressed when the player turned animations off.
+      if (typeof this.actuator.shake === "function") this.actuator.shake();
+      if (
+        typeof navigator !== "undefined" &&
+        typeof navigator.vibrate === "function" &&
+        typeof preferences !== "undefined" &&
+        preferences.motion
+      ) {
+        navigator.vibrate(8);
+      }
     }
   }
 

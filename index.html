@@ -113,6 +113,10 @@
             >New Game</a
           >
         </div>
+        <p class="first-run-hint" hidden>
+          Use the arrow keys — or swipe — to play.
+          <button class="hint-dismiss" type="button" aria-label="Dismiss hint">✕</button>
+        </p>
       </div>
 
       <div class="stats-panel" id="stats-panel" role="region" aria-label="Statistics" hidden>
@@ -193,52 +197,56 @@
         </div>
       </div>
 
-      <div class="game-container">
-        <div class="game-message" role="alert" aria-live="assertive" aria-atomic="true">
-          <p></p>
-          <div class="lower">
-            <a
-              class="keep-playing-button"
-              href="#"
-              role="button"
-              aria-label="Keep playing after winning"
-              >Keep going</a
-            >
-            <a class="retry-button" href="#" role="button" aria-label="Start a new game"
-              >Try again</a
-            >
-            <button class="share-button" type="button" aria-label="Share result">Share</button>
+      <div class="board-frame">
+        <div class="game-container">
+          <div class="game-message" role="alert" aria-live="assertive" aria-atomic="true">
+            <p></p>
+            <div class="run-details"></div>
+            <span class="new-best-chip" hidden>New best!</span>
+            <div class="lower">
+              <a
+                class="keep-playing-button"
+                href="#"
+                role="button"
+                aria-label="Keep playing after winning"
+                >Keep going</a
+              >
+              <a class="retry-button" href="#" role="button" aria-label="Start a new game"
+                >Try again</a
+              >
+              <button class="share-button" type="button" aria-label="Share result">Share</button>
+            </div>
           </div>
-        </div>
 
-        <div class="grid-container" role="grid" aria-label="2048 game board">
-          <div class="grid-row" role="row">
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
+          <div class="grid-container" role="grid" aria-label="2048 game board">
+            <div class="grid-row" role="row">
+              <div class="grid-cell" role="gridcell"></div>
+              <div class="grid-cell" role="gridcell"></div>
+              <div class="grid-cell" role="gridcell"></div>
+              <div class="grid-cell" role="gridcell"></div>
+            </div>
+            <div class="grid-row" role="row">
+              <div class="grid-cell" role="gridcell"></div>
+              <div class="grid-cell" role="gridcell"></div>
+              <div class="grid-cell" role="gridcell"></div>
+              <div class="grid-cell" role="gridcell"></div>
+            </div>
+            <div class="grid-row" role="row">
+              <div class="grid-cell" role="gridcell"></div>
+              <div class="grid-cell" role="gridcell"></div>
+              <div class="grid-cell" role="gridcell"></div>
+              <div class="grid-cell" role="gridcell"></div>
+            </div>
+            <div class="grid-row" role="row">
+              <div class="grid-cell" role="gridcell"></div>
+              <div class="grid-cell" role="gridcell"></div>
+              <div class="grid-cell" role="gridcell"></div>
+              <div class="grid-cell" role="gridcell"></div>
+            </div>
           </div>
-          <div class="grid-row" role="row">
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-          </div>
-          <div class="grid-row" role="row">
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-          </div>
-          <div class="grid-row" role="row">
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-            <div class="grid-cell" role="gridcell"></div>
-          </div>
-        </div>
 
-        <div class="tile-container"></div>
+          <div class="tile-container"></div>
+        </div>
       </div>
     </div>
 

@@ -9,6 +9,21 @@ window.requestAnimationFrame(() => {
   preferences.attachStorage(new LocalStorageManager());
   preferences.apply();
 
+  // Fluid board: the grid is a fixed 500px design (tile positions are
+  // absolute pixels), so narrow screens scale the whole board down as one
+  // unit — --board-scale feeds the CSS transform and the height pull-back.
+  const board = document.querySelector(".game-container");
+  if (board) {
+    const fitBoard = () => {
+      const available = board.parentElement ? board.parentElement.clientWidth : 0;
+      if (!available) return; // hidden/headless: keep the design size
+      const scale = Math.min(1, available / 500);
+      document.documentElement.style.setProperty("--board-scale", String(scale));
+    };
+    fitBoard();
+    window.addEventListener("resize", fitBoard);
+  }
+
   const select = document.querySelector(".theme-select");
   if (select) {
     const themes = themeManager.themes;
@@ -43,34 +58,69 @@ window.requestAnimationFrame(() => {
     });
   }
 
+  // Stats and Settings share one panel behaviour: the toggle owns
+  // aria-expanded, opening one panel closes the other, Escape and clicks
+  // outside close, and focus returns to the toggle on every close path.
+  const panels = [];
+
+  function openPanel(entry) {
+    for (const other of panels) {
+      if (other !== entry) closePanel(other, false);
+    }
+    if (entry.onOpen) entry.onOpen();
+    entry.panel.removeAttribute("hidden");
+    entry.button.setAttribute("aria-expanded", "true");
+    const first = entry.panel.querySelector("button, a, input, select");
+    if (first) first.focus();
+  }
+
+  function closePanel(entry, returnFocus) {
+    if (entry.panel.hasAttribute("hidden")) return;
+    entry.panel.setAttribute("hidden", "");
+    entry.button.setAttribute("aria-expanded", "false");
+    if (returnFocus) entry.button.focus();
+  }
+
+  function registerPanel(button, panel, onOpen) {
+    if (!button || !panel) return null;
+    const entry = { button, panel, onOpen };
+    panels.push(entry);
+    button.addEventListener("click", () => {
+      if (panel.hasAttribute("hidden")) openPanel(entry);
+      else closePanel(entry, false);
+    });
+    return entry;
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    for (const entry of panels) closePanel(entry, true);
+  });
+
+  document.addEventListener("click", (event) => {
+    for (const entry of panels) {
+      if (entry.panel.hasAttribute("hidden")) continue;
+      if (entry.panel.contains(event.target) || entry.button.contains(event.target)) continue;
+      closePanel(entry, false);
+    }
+  });
+
   // Stats panel: numbers only change when a game ends, so it re-renders on
-  // open. aria-expanded mirrors the visibility for assistive tech.
+  // open.
   const statsButton = document.querySelector(".stats-button");
   const statsPanel = document.querySelector(".stats-panel");
-  if (statsButton && statsPanel) {
-    const renderStats = () => {
-      const stats = gameManager.stats.get();
-      const rate = stats.played ? Math.round((stats.won / stats.played) * 100) : 0;
-      statsPanel.querySelector(".stat-played").textContent = String(stats.played);
-      statsPanel.querySelector(".stat-won").textContent = String(stats.won);
-      statsPanel.querySelector(".stat-rate").textContent = `${rate}%`;
-      statsPanel.querySelector(".stat-best-tile").textContent = stats.bestTile
-        ? String(stats.bestTile)
-        : "—";
-      statsPanel.querySelector(".stat-best-streak").textContent = String(stats.bestStreak);
-    };
-
-    statsButton.addEventListener("click", () => {
-      const opening = statsPanel.hasAttribute("hidden");
-      if (opening) {
-        renderStats();
-        statsPanel.removeAttribute("hidden");
-      } else {
-        statsPanel.setAttribute("hidden", "");
-      }
-      statsButton.setAttribute("aria-expanded", String(opening));
-    });
+  function renderStats() {
+    const stats = gameManager.stats.get();
+    const rate = stats.played ? Math.round((stats.won / stats.played) * 100) : 0;
+    statsPanel.querySelector(".stat-played").textContent = String(stats.played);
+    statsPanel.querySelector(".stat-won").textContent = String(stats.won);
+    statsPanel.querySelector(".stat-rate").textContent = `${rate}%`;
+    statsPanel.querySelector(".stat-best-tile").textContent = stats.bestTile
+      ? String(stats.bestTile)
+      : "—";
+    statsPanel.querySelector(".stat-best-streak").textContent = String(stats.bestStreak);
   }
+  registerPanel(statsButton, statsPanel, renderStats);
 
   // Settings panel: four switches over the preference flags. Everything
   // visual is opt-in; the panel mirrors the stored state on every open.
@@ -101,16 +151,22 @@ window.requestAnimationFrame(() => {
       }
     }
 
-    settingsButton.addEventListener("click", () => {
-      const opening = settingsPanel.hasAttribute("hidden");
-      if (opening) {
-        syncSwitches();
-        settingsPanel.removeAttribute("hidden");
-      } else {
-        settingsPanel.setAttribute("hidden", "");
-      }
-      settingsButton.setAttribute("aria-expanded", String(opening));
-    });
+    registerPanel(settingsButton, settingsPanel, syncSwitches);
+  }
+
+  // First-run hint: shown until dismissed (2048-hint-seen). A quiet nudge
+  // for new players, not a modal.
+  const hint = document.querySelector(".first-run-hint");
+  if (hint) {
+    const hintStorage = new LocalStorageManager();
+    if (!hintStorage.getFlag("hint-seen", false)) hint.removeAttribute("hidden");
+    const dismiss = hint.querySelector(".hint-dismiss");
+    if (dismiss) {
+      dismiss.addEventListener("click", () => {
+        hint.setAttribute("hidden", "");
+        hintStorage.setFlag("hint-seen", true);
+      });
+    }
   }
 
   // Live clock for the timer box: the elapsed time keeps moving between

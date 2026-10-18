@@ -14,8 +14,18 @@ body {
   font-size: 18px;
 }
 
+html {
+  /* Column flex + body auto margins centre the page on tall screens with
+   * no vh math inside the zoomed body (zoom multiplies any height set
+   * there — see the board-scale comment below). */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 body {
-  margin: 20px 0;
+  margin: auto 0;
+  padding: 20px;
   zoom: 1.25;
 }
 
@@ -159,8 +169,32 @@ hr {
 }
 
 .container {
-  width: 500px;
+  /* The board inside is a fixed 500px design; --board-scale (set by
+   * js/application.js on boot and resize) shrinks it as one unit on
+   * narrow screens, so the shell can be fluid without a second px
+   * geometry. overflow-x: clip stops the unscaled layout box from
+   * creating a horizontal scrollbar. */
+  width: min(100% - 32px, 500px);
   margin: 0 auto;
+  overflow-x: clip;
+}
+
+.board-frame {
+  /* The board keeps its 500px design and is scaled down inside this
+   * frame. The frame clips the unscaled layout box (a transform does not
+   * change it, and the absolutely positioned tiles would otherwise add
+   * page scroll on narrow screens) and reserves exactly the scaled
+   * height, so everything below closes up. */
+  position: relative;
+  height: calc(500px * var(--board-scale, 1));
+  overflow: hidden;
+  margin-top: 40px;
+}
+
+.game-container {
+  transform-origin: top left;
+  transform: scale(var(--board-scale, 1));
+  margin-top: 0;
 }
 
 @-webkit-keyframes fade-in {
@@ -678,14 +712,12 @@ body[data-theme="classic"] .tile.tile-2048 .tile-inner {
   }
 
   body {
-    margin: 20px 0;
-    padding: 0 20px;
+    padding: 16px;
     zoom: 1;
   }
 
   .container {
-    width: 280px;
-    margin: 0 auto;
+    width: 100%;
   }
 
   .score-container,
@@ -704,229 +736,8 @@ body[data-theme="classic"] .tile.tile-2048 .tile-inner {
     padding: 0 8px;
   }
 
-  .game-container {
+  .board-frame {
     margin-top: 17px;
-    position: relative;
-    padding: 10px;
-    cursor: default;
-    -webkit-touch-callout: none;
-    -ms-touch-callout: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -ms-touch-action: none;
-    touch-action: none;
-    background: #bbada0;
-    border-radius: 6px;
-    width: 280px;
-    height: 280px;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-  }
-  .game-container .game-message {
-    display: none;
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: rgba(238, 228, 218, 0.5);
-    z-index: 100;
-    text-align: center;
-    -webkit-animation: fade-in 600ms ease 400ms;
-    -moz-animation: fade-in 600ms ease 400ms;
-    animation: fade-in 600ms ease 400ms;
-    -webkit-animation-fill-mode: both;
-    -moz-animation-fill-mode: both;
-    animation-fill-mode: both;
-  }
-  .game-container .game-message p {
-    font-size: 60px;
-    font-weight: bold;
-    height: 60px;
-    line-height: 60px;
-    margin-top: 222px;
-  }
-  .game-container .game-message .lower {
-    display: block;
-    margin-top: 59px;
-  }
-  .game-container .game-message a {
-    display: inline-block;
-    background: #776e65;
-    border-radius: 3px;
-    padding: 0 20px;
-    text-decoration: none;
-    color: #f9f6f2;
-    height: 40px;
-    line-height: 42px;
-    margin-left: 9px;
-  }
-  .game-container .game-message a.keep-playing-button {
-    display: none;
-  }
-  .game-container .game-message.game-won {
-    background: rgba(237, 194, 46, 0.5);
-    color: #f9f6f2;
-  }
-  .game-container .game-message.game-won a.keep-playing-button {
-    display: inline-block;
-  }
-  .game-container .game-message.game-won,
-  .game-container .game-message.game-over {
-    display: block;
-  }
-
-  .grid-container {
-    position: absolute;
-    z-index: 1;
-  }
-
-  .grid-row {
-    margin-bottom: 10px;
-  }
-  .grid-row:last-child {
-    margin-bottom: 0;
-  }
-  .grid-row:after {
-    content: "";
-    display: block;
-    clear: both;
-  }
-
-  .grid-cell {
-    width: 57.5px;
-    height: 57.5px;
-    margin-right: 10px;
-    float: left;
-    border-radius: 3px;
-    background: rgba(238, 228, 218, 0.35);
-  }
-  .grid-cell:last-child {
-    margin-right: 0;
-  }
-
-  .tile-container {
-    position: absolute;
-    z-index: 2;
-  }
-
-  .tile,
-  .tile .tile-inner {
-    width: 58px;
-    height: 58px;
-    line-height: 58px;
-  }
-  .tile.tile-position-1-1 {
-    -webkit-transform: translate(0px, 0px);
-    -moz-transform: translate(0px, 0px);
-    -ms-transform: translate(0px, 0px);
-    transform: translate(0px, 0px);
-  }
-  .tile.tile-position-1-2 {
-    -webkit-transform: translate(0px, 67px);
-    -moz-transform: translate(0px, 67px);
-    -ms-transform: translate(0px, 67px);
-    transform: translate(0px, 67px);
-  }
-  .tile.tile-position-1-3 {
-    -webkit-transform: translate(0px, 135px);
-    -moz-transform: translate(0px, 135px);
-    -ms-transform: translate(0px, 135px);
-    transform: translate(0px, 135px);
-  }
-  .tile.tile-position-1-4 {
-    -webkit-transform: translate(0px, 202px);
-    -moz-transform: translate(0px, 202px);
-    -ms-transform: translate(0px, 202px);
-    transform: translate(0px, 202px);
-  }
-  .tile.tile-position-2-1 {
-    -webkit-transform: translate(67px, 0px);
-    -moz-transform: translate(67px, 0px);
-    -ms-transform: translate(67px, 0px);
-    transform: translate(67px, 0px);
-  }
-  .tile.tile-position-2-2 {
-    -webkit-transform: translate(67px, 67px);
-    -moz-transform: translate(67px, 67px);
-    -ms-transform: translate(67px, 67px);
-    transform: translate(67px, 67px);
-  }
-  .tile.tile-position-2-3 {
-    -webkit-transform: translate(67px, 135px);
-    -moz-transform: translate(67px, 135px);
-    -ms-transform: translate(67px, 135px);
-    transform: translate(67px, 135px);
-  }
-  .tile.tile-position-2-4 {
-    -webkit-transform: translate(67px, 202px);
-    -moz-transform: translate(67px, 202px);
-    -ms-transform: translate(67px, 202px);
-    transform: translate(67px, 202px);
-  }
-  .tile.tile-position-3-1 {
-    -webkit-transform: translate(135px, 0px);
-    -moz-transform: translate(135px, 0px);
-    -ms-transform: translate(135px, 0px);
-    transform: translate(135px, 0px);
-  }
-  .tile.tile-position-3-2 {
-    -webkit-transform: translate(135px, 67px);
-    -moz-transform: translate(135px, 67px);
-    -ms-transform: translate(135px, 67px);
-    transform: translate(135px, 67px);
-  }
-  .tile.tile-position-3-3 {
-    -webkit-transform: translate(135px, 135px);
-    -moz-transform: translate(135px, 135px);
-    -ms-transform: translate(135px, 135px);
-    transform: translate(135px, 135px);
-  }
-  .tile.tile-position-3-4 {
-    -webkit-transform: translate(135px, 202px);
-    -moz-transform: translate(135px, 202px);
-    -ms-transform: translate(135px, 202px);
-    transform: translate(135px, 202px);
-  }
-  .tile.tile-position-4-1 {
-    -webkit-transform: translate(202px, 0px);
-    -moz-transform: translate(202px, 0px);
-    -ms-transform: translate(202px, 0px);
-    transform: translate(202px, 0px);
-  }
-  .tile.tile-position-4-2 {
-    -webkit-transform: translate(202px, 67px);
-    -moz-transform: translate(202px, 67px);
-    -ms-transform: translate(202px, 67px);
-    transform: translate(202px, 67px);
-  }
-  .tile.tile-position-4-3 {
-    -webkit-transform: translate(202px, 135px);
-    -moz-transform: translate(202px, 135px);
-    -ms-transform: translate(202px, 135px);
-    transform: translate(202px, 135px);
-  }
-  .tile.tile-position-4-4 {
-    -webkit-transform: translate(202px, 202px);
-    -moz-transform: translate(202px, 202px);
-    -ms-transform: translate(202px, 202px);
-    transform: translate(202px, 202px);
-  }
-
-  .tile .tile-inner {
-    font-size: calc(var(--tile-font-size, 55px) * 0.55);
-  }
-
-  .game-message p {
-    font-size: 30px !important;
-    height: 30px !important;
-    line-height: 30px !important;
-    margin-top: 90px !important;
-  }
-  .game-message .lower {
-    margin-top: 30px !important;
   }
 }
 
@@ -1696,4 +1507,94 @@ body.reduced-motion .score-container .score-addition,
 body.reduced-motion .best-container .score-addition,
 body.reduced-motion .game-container .game-message {
   animation: none;
+}
+
+/* ─── End-of-run summary ────────────────────────────────────────
+ * The overlay reports the run's numbers instead of only the verdict;
+ * the chip marks a personal best. */
+.game-container .game-message .run-details {
+  margin-top: 10px;
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: bold;
+  opacity: 0.85;
+}
+.new-best-chip {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #edc22e;
+  color: #3c3a32;
+  font-size: 14px;
+  font-weight: bold;
+}
+.new-best-chip[hidden] {
+  display: none;
+}
+body.dark .game-container .game-message .run-details {
+  color: #f2efe9;
+}
+
+/* ─── First-run hint ────────────────────────────────────────────
+ * Shown until dismissed (2048-hint-seen); a quiet nudge, not a modal. */
+.first-run-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 3px;
+  background: #eee4da;
+  color: #776e65;
+  font-size: 15px;
+  font-weight: bold;
+}
+.first-run-hint[hidden] {
+  display: none;
+}
+.hint-dismiss {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+.hint-dismiss:focus-visible {
+  outline: 3px solid #f67c5f;
+  outline-offset: 2px;
+}
+body.dark .first-run-hint {
+  background: #23232d;
+  color: #d5d1ca;
+}
+
+/* ─── Invalid-move feedback ─────────────────────────────────────
+ * A short shake when a move changes nothing (see GameManager.move). */
+.board-shake {
+  animation: board-shake 200ms ease-in-out;
+}
+@keyframes board-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+body.reduced-motion .board-shake {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .board-shake {
+    animation: none;
+  }
 }
