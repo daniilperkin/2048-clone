@@ -1,0 +1,8 @@
+{
+  "extends": ["stylelint-config-recommended"],
+  "rules": {
+    "property-no-unknown": [true, { "ignoreProperties": ["zoom"] }],
+    "no-descending-specificity": null,
+    "no-duplicate-selectors": null
+  }
+}

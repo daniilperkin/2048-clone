@@ -52,4 +52,13 @@ describe("single-file bundle", () => {
     expect(out).not.toMatch(/<link\s+rel=/);
     expect(out).toContain("data:image/svg+xml;base64,");
   });
+
+  it("keeps the single file under the size budget", () => {
+    // 2048.html is the distributable artifact (and gets embedded in other
+    // projects). A runaway addition — or an accidentally inlined asset —
+    // must fail loudly instead of quietly shipping a fat file.
+    execFileSync(process.execPath, ["build-bundle.js"], { cwd: ROOT, stdio: "pipe" });
+    const bytes = Buffer.byteLength(readFileSync(resolve(ROOT, "2048.html"), "utf8"), "utf8");
+    expect(bytes).toBeLessThan(200 * 1024);
+  });
 });

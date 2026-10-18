@@ -4,6 +4,10 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     include: ["test/**/*.test.js"],
+    // jsdom construction dominated the suite (94% of tracked time, ~80 s
+    // across 21 files) — vmThreads reuses one jsdom per worker while
+    // keeping per-file isolation.
+    pool: "vmThreads",
     coverage: {
       provider: "v8",
       include: ["js/**/*.js"],
