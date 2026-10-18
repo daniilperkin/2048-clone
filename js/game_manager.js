@@ -1,5 +1,5 @@
 /* exported GameManager */
-/* global Grid, Tile, SeededRandom, themeManager, DIRECTIONS, soundManager, ViewTransitions, StatsTracker, ShareResult, preferences */
+/* global Grid, Tile, SeededRandom, themeManager, DIRECTIONS, soundManager, ViewTransitions, StatsTracker, ShareResult, Leaderboard, DailyStreak, preferences */
 class GameManager {
   constructor(size, InputManager, Actuator, StorageManager) {
     this.size = size; // Size of the grid
@@ -15,6 +15,10 @@ class GameManager {
     // numbers are kept alongside the undo snapshots so taking back the move
     // that ended a game also rolls the record back.
     this.stats = new StatsTracker(this.storageManager);
+    // Local records: top-5 runs per mode and the daily-participation
+    // streak (see js/records.js). Both are undo-aware like the stats.
+    this.leaderboard = new Leaderboard(this.storageManager);
+    this.dailyStreak = new DailyStreak(this.storageManager);
 
     this.startTiles = 2;
     this.winThreshold = themeManager.get().winThreshold;
@@ -79,6 +83,8 @@ class GameManager {
   // Set up the game
   setup() {
     this.date = SeededRandom.dateKey();
+    // Playing today's daily extends the streak (once per day).
+    if (this.mode === "daily") this.dailyStreak.touch(this.date);
     this.history = [];
     this.rng = null;
     let previousState = this.storageManager.getGameState(this.mode);
@@ -122,6 +128,7 @@ class GameManager {
     this.keepPlayingEnabled = false;
     // No outcome recorded for this game yet (non-null once one is).
     this.statsPrevious = null;
+    this.leaderboardPrevious = null;
     this.addStartTiles();
   }
 
@@ -141,6 +148,7 @@ class GameManager {
     this.won = s.won;
     this.keepPlayingEnabled = s.keepPlayingEnabled || s.keepPlaying || false;
     this.statsPrevious = s.statsPrevious || null;
+    this.leaderboardPrevious = s.leaderboardPrevious || null;
     this.rng = this.mode === "daily" ? new SeededRandom(s.rngState) : null;
   }
 
@@ -239,6 +247,7 @@ class GameManager {
       won: this.won,
       keepPlayingEnabled: this.keepPlayingEnabled,
       statsPrevious: this.statsPrevious,
+      leaderboardPrevious: this.leaderboardPrevious,
       mode: this.mode,
       date: this.date,
       rngState: this.rng ? this.rng.state : null,
@@ -260,6 +269,7 @@ class GameManager {
       won: this.won,
       keepPlayingEnabled: this.keepPlayingEnabled,
       statsPrevious: this.statsPrevious,
+      leaderboardPrevious: this.leaderboardPrevious,
       rngState: this.rng ? this.rng.state : null,
     };
   }
@@ -277,8 +287,13 @@ class GameManager {
     // for that ending must come back out: the snapshot predates the
     // recording (statsPrevious was still null when it was taken).
     const rollback = this.statsPrevious && !snap.statsPrevious ? this.statsPrevious : null;
+    // Same for the leaderboard: an undone ending must not leave its run in
+    // the top five.
+    const boardRollback =
+      this.leaderboardPrevious && !snap.leaderboardPrevious ? this.leaderboardPrevious : null;
     this.applySnapshot(snap);
     if (rollback) this.stats.restore(rollback);
+    if (boardRollback) this.leaderboard.restore(this.mode, boardRollback);
     soundManager.undo();
     this.actuator.continueGame(); // Clear a win/lose overlay
     this.actuate();
@@ -414,6 +429,16 @@ class GameManager {
     if (this.statsPrevious) return; // already counted for this game
     if (this.over || this.won) {
       this.statsPrevious = this.stats.record(this.won, this.bestTileValue());
+      // Top-5 run per mode; the pre-insert list rides the undo snapshots
+      // so an undone ending disappears from the board again.
+      this.leaderboardPrevious = this.leaderboard.get(this.mode);
+      this.leaderboard.record(this.mode, {
+        score: this.score,
+        moves: this.moves,
+        bestTile: this.bestTileValue(),
+        date: this.date,
+        at: Date.now(),
+      });
       // Opt-in celebration (see js/preferences.js): only on the first end
       // of a game, and never while animations are turned off.
       if (

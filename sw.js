@@ -15,7 +15,7 @@
  */
 "use strict";
 
-const CACHE_VERSION = "v3";
+const CACHE_VERSION = "v4";
 const CACHE_NAME = `2048-shell-${CACHE_VERSION}`;
 
 // The boot shell — kept in sync with index.html by test/pwa.test.js.
@@ -37,6 +37,7 @@ const APP_SHELL = [
   "./js/local_storage_manager.js",
   "./js/stats.js",
   "./js/share.js",
+  "./js/records.js",
   "./js/preferences.js",
   "./js/game_manager.js",
   "./js/application.js",

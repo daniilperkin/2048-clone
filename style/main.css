@@ -1812,3 +1812,50 @@ body.patterns .tile.tile-8192 .tile-inner,
 body.patterns .tile.tile-16384 .tile-inner {
   background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.3) 0 2px, transparent 2px 4px);
 }
+
+/* ─── Stats panel extras: daily streak + top-5 runs ──────────── */
+.stat-daily-line {
+  margin: 12px 0 6px;
+  color: #776e65;
+  font-weight: bold;
+}
+.stat-daily-line strong {
+  color: #776e65;
+}
+.leaderboard {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.leaderboard li {
+  font-size: 14px;
+  font-weight: bold;
+  color: #776e65;
+  padding: 4px 8px;
+  border-radius: 3px;
+  background: rgba(119, 110, 101, 0.08);
+}
+.leaderboard .leaderboard-empty {
+  font-weight: normal;
+  font-style: italic;
+  background: transparent;
+  padding-left: 0;
+}
+body.dark .stat-daily-line,
+body.dark .stat-daily-line strong,
+body.dark .leaderboard li {
+  color: #d5d1ca;
+}
+body.dark .leaderboard li {
+  background: rgba(255, 255, 255, 0.06);
+}
+body.dark .leaderboard .leaderboard-empty {
+  background: transparent;
+}
+body[data-theme="doodle"] .leaderboard li {
+  background: rgba(59, 53, 44, 0.08);
+  color: #3b352c;
+}

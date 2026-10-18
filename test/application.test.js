@@ -85,6 +85,14 @@ describe("application bootstrap", () => {
       "2048-stats",
       JSON.stringify({ played: 4, won: 1, bestTile: 128, streak: 0, bestStreak: 1 })
     );
+    localStorage.setItem(
+      "2048-leaderboard-classic",
+      JSON.stringify([
+        { score: 512, moves: 20, bestTile: 128, date: "2026-10-10", at: 1 },
+        { score: 300, moves: 15, bestTile: 64, date: "2026-10-09", at: 2 },
+      ])
+    );
+    localStorage.setItem("2048-daily-streak", JSON.stringify({ count: 3, lastDate: "2026-10-10" }));
     loadApplication();
     const button = document.querySelector(".stats-button");
     const panel = document.querySelector(".stats-panel");
@@ -98,6 +106,10 @@ describe("application bootstrap", () => {
     expect(panel.querySelector(".stat-rate").textContent).toBe("25%");
     expect(panel.querySelector(".stat-best-tile").textContent).toBe("128");
     expect(panel.querySelector(".stat-best-streak").textContent).toBe("1");
+    expect(panel.querySelector(".stat-daily-streak").textContent).toBe("3");
+    const rows = panel.querySelectorAll(".leaderboard li");
+    expect(rows).toHaveLength(2);
+    expect(rows[0].textContent).toContain("512");
 
     button.click();
     expect(panel.hasAttribute("hidden")).toBe(true);

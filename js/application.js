@@ -216,6 +216,31 @@ window.requestAnimationFrame(() => {
       ? String(stats.bestTile)
       : "—";
     statsPanel.querySelector(".stat-best-streak").textContent = String(stats.bestStreak);
+    statsPanel.querySelector(".stat-daily-streak").textContent = String(
+      gameManager.dailyStreak.get().count
+    );
+
+    // Top-5 runs for the mode currently being played.
+    const list = statsPanel.querySelector(".leaderboard");
+    if (list) {
+      list.textContent = "";
+      const entries = gameManager.leaderboard.get(gameManager.mode);
+      if (entries.length === 0) {
+        const empty = document.createElement("li");
+        empty.className = "leaderboard-empty";
+        empty.textContent = "No finished games yet.";
+        list.appendChild(empty);
+      } else {
+        entries.forEach((entry, index) => {
+          const item = document.createElement("li");
+          const moves = entry.moves === 1 ? "move" : "moves";
+          item.textContent = `${index + 1}. ${entry.score.toLocaleString("en-US")} · ${
+            entry.moves
+          } ${moves} · ${entry.date}`;
+          list.appendChild(item);
+        });
+      }
+    }
   }
   registerPanel(statsButton, statsPanel, renderStats);
 

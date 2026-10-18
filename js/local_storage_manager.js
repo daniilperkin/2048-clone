@@ -176,4 +176,45 @@ class LocalStorageManager {
       // Quota exceeded or storage disabled — silently drop the update
     }
   }
+
+  // Top-5 runs per mode and the daily-participation streak (see
+  // js/records.js). JSON under the usual namespace; corrupted data reads
+  // as absent instead of crashing.
+  getLeaderboard(mode) {
+    return this.readJson(mode === "daily" ? "2048-leaderboard-daily" : "2048-leaderboard-classic");
+  }
+
+  setLeaderboard(mode, entries) {
+    this.writeJson(
+      mode === "daily" ? "2048-leaderboard-daily" : "2048-leaderboard-classic",
+      entries
+    );
+  }
+
+  getDailyStreak() {
+    return this.readJson("2048-daily-streak");
+  }
+
+  setDailyStreak(value) {
+    this.writeJson("2048-daily-streak", value);
+  }
+
+  readJson(key) {
+    const raw = this.storage.getItem(key);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch (error) {
+      this.storage.removeItem(key);
+      return null;
+    }
+  }
+
+  writeJson(key, value) {
+    try {
+      this.storage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      // Quota exceeded or storage disabled — silently drop the update
+    }
+  }
 }
