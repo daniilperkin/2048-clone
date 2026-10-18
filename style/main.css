@@ -1245,9 +1245,18 @@ body[data-theme="doodle"] .game-message .share-button:focus-visible {
 /* ─── Per-theme gradient backgrounds ─────────────────────────────
  * A quiet depth behind the board instead of one flat cream. Very
  * subtle by design: every stop stays within a few points of the
- * classic palette, so tile contrast never changes between themes. */
+ * classic palette, so tile contrast never changes between themes.
+ *
+ * <html> must stay background-less: the body's background then
+ * propagates to the canvas, so the gradient always covers the whole
+ * viewport. A body min-height would NOT work here — body carries
+ * `zoom: 1.25`, which multiplies the computed height (100vh-40px
+ * rendered 1325px tall inside an 1100px window and forced a
+ * scrollbar on every desktop page). */
+html {
+  background: transparent;
+}
 body {
-  min-height: calc(100vh - 40px);
   background-attachment: fixed;
 }
 body[data-theme="classic"] {
