@@ -160,4 +160,20 @@ class LocalStorageManager {
       // Quota exceeded or storage disabled — silently drop the update
     }
   }
+
+  // String-valued flag variant: dark mode stores "0" / "1" / "auto" in the
+  // same key, so the boolean getFlag keeps working for every other
+  // preference while this one can carry three states.
+  getFlagValue(name, fallback = null) {
+    const raw = this.storage.getItem(`2048-${name}`);
+    return raw === null || raw === undefined ? fallback : raw;
+  }
+
+  setFlagValue(name, value) {
+    try {
+      this.storage.setItem(`2048-${name}`, String(value));
+    } catch (error) {
+      // Quota exceeded or storage disabled — silently drop the update
+    }
+  }
 }

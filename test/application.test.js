@@ -33,20 +33,40 @@ describe("application bootstrap", () => {
     };
   });
 
-  it("fills the theme select from the theme registry", () => {
+  it("fills the theme picker from the theme registry", () => {
     loadApplication();
-    const select = document.querySelector(".theme-select");
-    expect(select.options.length).toBe(Object.keys(themeManager.themes).length);
-    expect(select.value).toBe(themeManager.getKey());
+    const options = document.querySelectorAll(".theme-options .theme-option");
+    expect(options.length).toBe(Object.keys(themeManager.themes).length);
+    const selected = document.querySelector('.theme-option[aria-selected="true"]');
+    expect(selected.dataset.themeKey).toBe(themeManager.getKey());
+    expect(document.querySelector(".theme-name").textContent).toBe(themeManager.get().name);
   });
 
-  it("applies a theme chosen from the select", () => {
+  it("selects a theme from the picker", () => {
     loadApplication();
-    const select = document.querySelector(".theme-select");
-    const keys = Object.keys(themeManager.themes);
-    select.value = keys[1];
-    select.dispatchEvent(new Event("change"));
-    expect(themeManager.getKey()).toBe(keys[1]);
+    document.querySelector(".theme-select").click();
+    expect(document.querySelector(".theme-options").hasAttribute("hidden")).toBe(false);
+
+    const options = [...document.querySelectorAll(".theme-option")];
+    const target = options[1];
+    target.click();
+
+    expect(themeManager.getKey()).toBe(target.dataset.themeKey);
+    expect(document.querySelector(".theme-options").hasAttribute("hidden")).toBe(true);
+    expect(document.querySelector(".theme-name").textContent).toBe(themeManager.get().name);
+  });
+
+  it("supports keyboard navigation in the picker", () => {
+    loadApplication();
+    document.querySelector(".theme-select").click(); // opens and focuses the selected option
+
+    const list = document.querySelector(".theme-options");
+    list.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    const focused = document.activeElement;
+    expect(focused.classList.contains("theme-option")).toBe(true);
+
+    list.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(themeManager.getKey()).toBe(focused.dataset.themeKey);
   });
 
   it("sound toggle mirrors and flips the stored preference", () => {
@@ -84,7 +104,7 @@ describe("application bootstrap", () => {
     expect(button.getAttribute("aria-expanded")).toBe("false");
   });
 
-  it("settings panel opens and its switches flip and persist preferences", () => {
+  it("settings panel opens and its controls flip and persist preferences", () => {
     loadApplication();
     const button = document.querySelector(".settings-button");
     const panel = document.querySelector(".settings-panel");
@@ -94,12 +114,19 @@ describe("application bootstrap", () => {
     expect(panel.hasAttribute("hidden")).toBe(false);
     expect(button.getAttribute("aria-expanded")).toBe("true");
 
-    const darkSwitch = panel.querySelector(".switch-dark");
-    expect(darkSwitch.getAttribute("aria-checked")).toBe("false");
-    darkSwitch.click();
-    expect(darkSwitch.getAttribute("aria-checked")).toBe("true");
+    // Three-state dark mode.
+    const onOption = panel.querySelector('[data-dark-mode="on"]');
+    expect(onOption.getAttribute("aria-checked")).toBe("false");
+    onOption.click();
+    expect(onOption.getAttribute("aria-checked")).toBe("true");
     expect(document.body.classList.contains("dark")).toBe(true);
     expect(localStorage.getItem("2048-dark")).toBe("1");
+
+    const autoOption = panel.querySelector('[data-dark-mode="auto"]');
+    autoOption.click();
+    expect(autoOption.getAttribute("aria-checked")).toBe("true");
+    expect(onOption.getAttribute("aria-checked")).toBe("false");
+    expect(localStorage.getItem("2048-dark")).toBe("auto");
 
     const motionSwitch = panel.querySelector(".switch-motion");
     expect(motionSwitch.getAttribute("aria-checked")).toBe("true");
@@ -110,6 +137,11 @@ describe("application bootstrap", () => {
     const ambienceSwitch = panel.querySelector(".switch-ambience");
     ambienceSwitch.click();
     expect(document.body.classList.contains("ambience-on")).toBe(true);
+
+    const patternsSwitch = panel.querySelector(".switch-patterns");
+    patternsSwitch.click();
+    expect(document.body.classList.contains("patterns")).toBe(true);
+    expect(localStorage.getItem("2048-patterns")).toBe("1");
 
     button.click();
     expect(panel.hasAttribute("hidden")).toBe(true);

@@ -1598,3 +1598,217 @@ body.reduced-motion .board-shake {
     animation: none;
   }
 }
+
+/* ─── Theme picker (listbox with tile-colour swatches) ───────────
+ * The native <select> could not preview a theme; this is a button +
+ * listbox pair with the usual keyboard model (arrows/Home/End move,
+ * Enter/Space select, Escape closes — see js/application.js). */
+.theme-picker {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.theme-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.theme-name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.theme-swatches {
+  display: inline-flex;
+}
+.swatch-row {
+  display: inline-flex;
+  gap: 3px;
+}
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+.theme-options {
+  position: absolute;
+  z-index: 300;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: #f9f6f2;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+.theme-options[hidden] {
+  display: none;
+}
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  color: #776e65;
+  font-weight: bold;
+  cursor: pointer;
+}
+.theme-option:hover,
+.theme-option:focus-visible {
+  background: #eee4da;
+}
+.theme-option:focus-visible {
+  outline: 3px solid #f67c5f;
+  outline-offset: -3px;
+}
+.theme-option[aria-selected="true"] {
+  background: #edc22e;
+  color: #3c3a32;
+}
+.theme-option-name {
+  flex: 1 1 auto;
+}
+body.dark .theme-options {
+  background: #23232d;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+body.dark .theme-option {
+  color: #d5d1ca;
+}
+body.dark .theme-option:hover,
+body.dark .theme-option:focus-visible {
+  background: #33333e;
+}
+body.dark .theme-option[aria-selected="true"] {
+  background: #c9a227;
+  color: #14141c;
+}
+
+/* ─── Segmented control (dark mode: off / on / auto) ──────────── */
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: #bbada0;
+}
+.segmented-option {
+  border: none;
+  background: transparent;
+  color: #f9f6f2;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.segmented-option[aria-checked="true"] {
+  background: #f9f6f2;
+  color: #776e65;
+}
+.segmented-option:focus-visible {
+  outline: 3px solid #f67c5f;
+  outline-offset: 2px;
+}
+body[data-theme="doodle"] .segmented {
+  background: #c8bba0;
+}
+body[data-theme="doodle"] .segmented-option {
+  color: #3b352c;
+}
+body[data-theme="doodle"] .segmented-option[aria-checked="true"] {
+  background: #f4efe4;
+}
+body.dark .segmented {
+  background: #44444f;
+}
+body.dark .segmented-option {
+  color: #e8e5df;
+}
+body.dark .segmented-option[aria-checked="true"] {
+  background: #f2efe9;
+  color: #1c1c27;
+}
+
+/* ─── Colour-blind tile patterns (opt-in) ───────────────────────
+ * Values share hues across themes (8/16/32 are all oranges in Classic),
+ * so colour alone cannot separate them. Each value gets its own stripe
+ * geometry once the player enables Tile patterns. */
+body.patterns .tile.tile-8 .tile-inner {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.18) 0 3px,
+    transparent 3px 9px
+  );
+}
+body.patterns .tile.tile-16 .tile-inner {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.18) 0 3px,
+    transparent 3px 9px
+  );
+}
+body.patterns .tile.tile-32 .tile-inner {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.18) 0 3px,
+    transparent 3px 9px
+  );
+}
+body.patterns .tile.tile-64 .tile-inner {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.22) 0 2px,
+    transparent 2px 6px
+  );
+}
+body.patterns .tile.tile-128 .tile-inner {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.22) 0 2px,
+    transparent 2px 6px
+  );
+}
+body.patterns .tile.tile-256 .tile-inner {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.22) 0 2px,
+    transparent 2px 6px
+  );
+}
+body.patterns .tile.tile-512 .tile-inner {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.26) 0 2px,
+    transparent 2px 5px
+  );
+}
+body.patterns .tile.tile-1024 .tile-inner {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.26) 0 2px,
+    transparent 2px 5px
+  );
+}
+body.patterns .tile.tile-2048 .tile-inner {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.26) 0 2px,
+    transparent 2px 5px
+  );
+}
+body.patterns .tile.tile-4096 .tile-inner,
+body.patterns .tile.tile-8192 .tile-inner,
+body.patterns .tile.tile-16384 .tile-inner {
+  background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.3) 0 2px, transparent 2px 4px);
+}

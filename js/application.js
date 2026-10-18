@@ -11,7 +11,7 @@ window.requestAnimationFrame(() => {
 
   // Fluid board: the grid is a fixed 500px design (tile positions are
   // absolute pixels), so narrow screens scale the whole board down as one
-  // unit — --board-scale feeds the CSS transform and the height pull-back.
+  // unit — --board-scale feeds the CSS transform and the frame height.
   const board = document.querySelector(".game-container");
   if (board) {
     const fitBoard = () => {
@@ -24,21 +24,118 @@ window.requestAnimationFrame(() => {
     window.addEventListener("resize", fitBoard);
   }
 
-  const select = document.querySelector(".theme-select");
-  if (select) {
-    const themes = themeManager.themes;
-    for (const key of Object.keys(themes)) {
-      const option = document.createElement("option");
-      option.value = key;
-      option.textContent = themes[key].name;
-      select.appendChild(option);
+  // Theme picker: a listbox of tile-colour swatches (the native <select>
+  // could not preview a theme). Keyboard: arrows/Home/End move, Enter or
+  // Space selects, Escape closes and returns focus to the button.
+  const picker = document.querySelector(".theme-picker");
+  const pickerButton = picker ? picker.querySelector(".theme-select") : null;
+  const pickerList = picker ? picker.querySelector(".theme-options") : null;
+  if (picker && pickerButton && pickerList) {
+    const swatchValues = [2, 8, 32, 128];
+    const colorFor = (theme, value) => (theme.colors[value] || theme.superColor).bg;
+
+    const buildSwatches = (theme) => {
+      const row = document.createElement("span");
+      row.className = "swatch-row";
+      row.setAttribute("aria-hidden", "true");
+      for (const value of swatchValues) {
+        const dot = document.createElement("span");
+        dot.className = "swatch";
+        dot.style.background = colorFor(theme, value);
+        row.appendChild(dot);
+      }
+      return row;
+    };
+
+    for (const key of Object.keys(themeManager.themes)) {
+      const theme = themeManager.themes[key];
+      const option = document.createElement("li");
+      option.className = "theme-option";
+      option.setAttribute("role", "option");
+      option.setAttribute("tabindex", "-1");
+      option.dataset.themeKey = key;
+      option.appendChild(buildSwatches(theme));
+      const name = document.createElement("span");
+      name.className = "theme-option-name";
+      name.textContent = theme.name;
+      option.appendChild(name);
+      pickerList.appendChild(option);
     }
-    select.value = themeManager.getKey();
-    select.addEventListener("change", () => {
-      // A theme switch re-skins the whole board at once; a view transition
-      // cross-fades it instead of snapping (see js/view_transitions.js).
-      ViewTransitions.run(() => themeManager.set(select.value));
+    const options = [...pickerList.querySelectorAll(".theme-option")];
+
+    const syncPicker = () => {
+      pickerButton.querySelector(".theme-name").textContent = themeManager.get().name;
+      const buttonSwatches = pickerButton.querySelector(".theme-swatches");
+      buttonSwatches.textContent = "";
+      buttonSwatches.appendChild(buildSwatches(themeManager.get()));
+      const activeKey = themeManager.getKey();
+      for (const option of options) {
+        option.setAttribute("aria-selected", String(option.dataset.themeKey === activeKey));
+      }
+    };
+
+    const closePicker = (returnFocus) => {
+      if (pickerList.hasAttribute("hidden")) return;
+      pickerList.setAttribute("hidden", "");
+      pickerButton.setAttribute("aria-expanded", "false");
+      if (returnFocus) pickerButton.focus();
+    };
+
+    const openPicker = () => {
+      pickerList.removeAttribute("hidden");
+      pickerButton.setAttribute("aria-expanded", "true");
+      const selected =
+        options.find((option) => option.getAttribute("aria-selected") === "true") || options[0];
+      if (selected) selected.focus();
+    };
+
+    const selectOption = (option) => {
+      const key = option.dataset.themeKey;
+      closePicker(true);
+      if (key && key !== themeManager.getKey()) {
+        // A theme switch re-skins the whole board at once; a view
+        // transition cross-fades it instead of snapping.
+        ViewTransitions.run(() => themeManager.set(key));
+      }
+      syncPicker();
+    };
+
+    pickerButton.addEventListener("click", () => {
+      if (pickerList.hasAttribute("hidden")) openPicker();
+      else closePicker(true);
     });
+
+    pickerList.addEventListener("keydown", (event) => {
+      const index = options.indexOf(document.activeElement);
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        const delta = event.key === "ArrowDown" ? 1 : -1;
+        options[(index + delta + options.length) % options.length].focus();
+      } else if (event.key === "Home" || event.key === "End") {
+        event.preventDefault();
+        options[event.key === "Home" ? 0 : options.length - 1].focus();
+      } else if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        if (index >= 0) selectOption(options[index]);
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        closePicker(true);
+      }
+    });
+
+    pickerList.addEventListener("click", (event) => {
+      const option = event.target.closest(".theme-option");
+      if (option) selectOption(option);
+    });
+
+    document.addEventListener("click", (event) => {
+      if (pickerList.hasAttribute("hidden")) return;
+      if (picker.contains(event.target)) return;
+      closePicker(false);
+    });
+
+    themeManager.onChange(() => syncPicker());
+    syncPicker();
   }
 
   // Sound is off until the player opts in. The button mirrors the stored
@@ -122,25 +219,41 @@ window.requestAnimationFrame(() => {
   }
   registerPanel(statsButton, statsPanel, renderStats);
 
-  // Settings panel: four switches over the preference flags. Everything
+  // Settings panel: three-state dark mode plus four switches. Everything
   // visual is opt-in; the panel mirrors the stored state on every open.
   const settingsButton = document.querySelector(".settings-button");
   const settingsPanel = document.querySelector(".settings-panel");
   if (settingsButton && settingsPanel) {
     const toggles = [
-      ["dark", ".switch-dark"],
       ["motion", ".switch-motion"],
       ["ambience", ".switch-ambience"],
+      ["patterns", ".switch-patterns"],
       ["celebrate", ".switch-celebrate"],
     ];
+    const darkOptions = [...settingsPanel.querySelectorAll("[data-dark-mode]")];
+
+    const syncDarkMode = () => {
+      for (const option of darkOptions) {
+        option.setAttribute(
+          "aria-checked",
+          String(option.dataset.darkMode === preferences.darkMode)
+        );
+      }
+    };
     const syncSwitches = () => {
       for (const [name, selector] of toggles) {
         const element = settingsPanel.querySelector(selector);
         if (element) element.setAttribute("aria-checked", String(preferences[name]));
       }
+      syncDarkMode();
     };
 
-    syncSwitches();
+    for (const option of darkOptions) {
+      option.addEventListener("click", () => {
+        preferences.setDarkMode(option.dataset.darkMode);
+        syncSwitches();
+      });
+    }
     for (const [name, selector] of toggles) {
       const element = settingsPanel.querySelector(selector);
       if (element) {
@@ -151,6 +264,7 @@ window.requestAnimationFrame(() => {
       }
     }
 
+    syncSwitches();
     registerPanel(settingsButton, settingsPanel, syncSwitches);
   }
 

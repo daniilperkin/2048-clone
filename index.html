@@ -47,7 +47,19 @@
 
       <div class="above-game">
         <div class="above-game-controls">
-          <select class="theme-select" aria-label="Change tile theme"></select>
+          <div class="theme-picker">
+            <button
+              class="theme-select"
+              type="button"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+              aria-label="Change tile theme"
+            >
+              <span class="theme-swatches" aria-hidden="true"></span>
+              <span class="theme-name">Classic</span>
+            </button>
+            <ul class="theme-options" role="listbox" aria-label="Tile themes" hidden></ul>
+          </div>
           <button
             class="sound-toggle"
             type="button"
@@ -147,15 +159,37 @@
       <div class="settings-panel" id="settings-panel" role="region" aria-label="Settings" hidden>
         <div class="settings-row">
           <span class="settings-label"
-            >Dark mode<span class="settings-hint">Darker background and controls</span></span
+            >Dark mode<span class="settings-hint">Off, on, or follow the system</span></span
           >
-          <button
-            class="switch switch-dark"
-            type="button"
-            role="switch"
-            aria-checked="false"
-            aria-label="Dark mode"
-          ></button>
+          <span class="segmented" role="radiogroup" aria-label="Dark mode">
+            <button
+              class="segmented-option"
+              type="button"
+              role="radio"
+              aria-checked="false"
+              data-dark-mode="off"
+            >
+              Off
+            </button>
+            <button
+              class="segmented-option"
+              type="button"
+              role="radio"
+              aria-checked="false"
+              data-dark-mode="on"
+            >
+              On
+            </button>
+            <button
+              class="segmented-option"
+              type="button"
+              role="radio"
+              aria-checked="false"
+              data-dark-mode="auto"
+            >
+              Auto
+            </button>
+          </span>
         </div>
         <div class="settings-row">
           <span class="settings-label"
@@ -181,6 +215,20 @@
             role="switch"
             aria-checked="false"
             aria-label="Animated background"
+          ></button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label"
+            >Tile patterns<span class="settings-hint"
+              >Stripes per value — a colour-blind aid</span
+            ></span
+          >
+          <button
+            class="switch switch-patterns"
+            type="button"
+            role="switch"
+            aria-checked="false"
+            aria-label="Tile patterns"
           ></button>
         </div>
         <div class="settings-row">

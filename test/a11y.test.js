@@ -97,9 +97,15 @@ describe("WCAG 2.1 AA (axe)", () => {
 
   it("open panels have no violations", async () => {
     loadApplication();
-    document.querySelector(".settings-button").click();
-    document.querySelector(".stats-button").click(); // opening one closes the other
-    const results = await axe(document.body, AXE_OPTIONS);
-    expect(results).toHaveNoViolations();
+    const settingsButton = document.querySelector(".settings-button");
+    const statsButton = document.querySelector(".stats-button");
+
+    settingsButton.click();
+    const settingsResults = await axe(document.body, AXE_OPTIONS);
+    expect(settingsResults).toHaveNoViolations();
+
+    statsButton.click(); // opening one closes the other
+    const statsResults = await axe(document.body, AXE_OPTIONS);
+    expect(statsResults).toHaveNoViolations();
   });
 });
