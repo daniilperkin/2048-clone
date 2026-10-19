@@ -5,8 +5,9 @@ Modernized, single-page 2048 game fork with theme switcher, accessibility (WCAG 
 ## Tech Stack & Architecture
 
 - **Runtime**: Vanilla JavaScript (plain `<script>` tags, shared global scope — no ES modules; Node 22.22.2+ for tooling — the jsdom test environment requires it)
-- **Testing**: Vitest (`vitest run`)
-- **Linting & Formatting**: ESLint 10 (`eslint .`), Prettier 3 (`prettier --check .`)
+- **Testing**: Vitest (`vitest run`) for logic and DOM under jsdom, plus one Playwright Chromium smoke test (`npm run test:e2e`) for what jsdom cannot see — layout, timing, real browser APIs
+- **Type-checking**: `tsc -p jsconfig.json` (`checkJs`, strict off) over the plain-JS sources; they are classic scripts, so one program sees every global class and no ambient declarations are needed
+- **Linting & Formatting**: ESLint 10 (`eslint .`), stylelint (`style/**/*.css`), Prettier 3 (`prettier --check .`)
 - **Bundler**: `build-bundle.js` (inlines all CSS, JS, and assets into standalone `2048.html`)
 
 The game files intentionally avoid ESM imports: `index.html` loads them via
