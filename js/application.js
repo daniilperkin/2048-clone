@@ -26,9 +26,19 @@ window.requestAnimationFrame(() => {
   const board = document.querySelector(".game-container");
   if (board) {
     const fitBoard = () => {
-      const available = board.parentElement ? board.parentElement.clientWidth : 0;
+      const parent = board.parentElement;
+      const available = parent ? parent.clientWidth : 0;
       if (!available) return; // hidden/headless: keep the design size
-      const scale = Math.min(1, available / 500);
+      // Width alone is not enough on phones: the header stack can leave less
+      // vertical room than the scaled board needs, and .board-frame clips
+      // whatever sticks out. Reserve the space the board really has below its
+      // own top edge, using the visual viewport when browser chrome shrinks it.
+      const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+      const docTop = board.getBoundingClientRect().top + window.scrollY;
+      const heightBudget = vh - docTop - 16;
+      const widthScale = available / 500;
+      const heightScale = heightBudget > 0 ? heightBudget / 500 : widthScale;
+      const scale = Math.max(0.45, Math.min(1, widthScale, heightScale));
       document.documentElement.style.setProperty("--board-scale", String(scale));
     };
     fitBoard();
@@ -385,6 +395,8 @@ window.requestAnimationFrame(() => {
       dismiss.addEventListener("click", () => {
         hint.setAttribute("hidden", "");
         hintStorage.setFlag("hint-seen", true);
+        // The board moves up once the hint is gone: give it the freed height.
+        window.dispatchEvent(new Event("resize"));
       });
     }
   }

@@ -225,7 +225,10 @@ hr {
   }
 }
 .game-container {
-  margin-top: 40px;
+  /* The .board-frame above already owns the gap and reserves exactly the
+   * scaled height; a margin here would push the 500px board down inside
+   * the clipped frame and cut its bottom row on phones. */
+  margin-top: 0;
   position: relative;
   padding: 15px;
   cursor: default;
@@ -738,6 +741,18 @@ body[data-theme="classic"] .tile.tile-2048 .tile-inner {
 
   .board-frame {
     margin-top: 17px;
+  }
+
+  /* The hint is a sibling of the controls row; without wrapping it gets
+   * squeezed into a 176px column and grows to ~214px tall (eight lines),
+   * pushing the board below the fold. Give it its own full-width row. */
+  .above-game {
+    flex-wrap: wrap;
+  }
+
+  .first-run-hint {
+    flex: 1 1 100%;
+    margin-top: 8px;
   }
 }
 
