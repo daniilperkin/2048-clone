@@ -60,3 +60,28 @@ jobs:
           path: 2048.html
           if-no-files-found: error
           retention-days: 14
+
+  # jsdom cannot catch layout, timing or real-browser API regressions (the
+  # 4 s view-transition deadlock proved that), so one Chromium smoke test
+  # runs against the served multi-file build.
+  e2e:
+    name: Browser smoke (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser smoke test
+        run: npm run test:e2e
