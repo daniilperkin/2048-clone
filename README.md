@@ -1,5 +1,7 @@
 # 2048-mine
 
+**Play online:** https://daniilperkin.github.io/2048-clone/ — works on phone and desktop.
+
 A modernized fork of [2048](https://github.com/gabrielecirulli/2048), originally based on [1024](https://play.google.com/store/apps/details?id=com.veewo.a1024) and [Saming's 2048](http://saming.fr/p/2048/), indirectly inspired by [Threes](https://asherv.com/threes/).
 
 ## What's different
