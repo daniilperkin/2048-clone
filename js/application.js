@@ -57,8 +57,12 @@ window.requestAnimationFrame(() => {
   // could not preview a theme). Keyboard: arrows/Home/End move, Enter or
   // Space selects, Escape closes and returns focus to the button.
   const picker = document.querySelector(".theme-picker");
-  const pickerButton = picker ? picker.querySelector(".theme-select") : null;
-  const pickerList = picker ? picker.querySelector(".theme-options") : null;
+  const pickerButton = picker
+    ? /** @type {HTMLElement} */ (picker.querySelector(".theme-select"))
+    : null;
+  const pickerList = picker
+    ? /** @type {HTMLElement} */ (picker.querySelector(".theme-options"))
+    : null;
   if (picker && pickerButton && pickerList) {
     const swatchValues = [2, 8, 32, 128];
     const colorFor = (theme, value) => (theme.colors[value] || theme.superColor).bg;
@@ -90,7 +94,9 @@ window.requestAnimationFrame(() => {
       option.appendChild(name);
       pickerList.appendChild(option);
     }
-    const options = [...pickerList.querySelectorAll(".theme-option")];
+    const options = /** @type {HTMLElement[]} */ ([
+      ...pickerList.querySelectorAll(".theme-option"),
+    ]);
 
     const syncPicker = () => {
       pickerButton.querySelector(".theme-name").textContent = themeManager.get().name;
@@ -134,8 +140,8 @@ window.requestAnimationFrame(() => {
       else closePicker(true);
     });
 
-    pickerList.addEventListener("keydown", (event) => {
-      const index = options.indexOf(document.activeElement);
+    pickerList.addEventListener("keydown", (/** @type {KeyboardEvent} */ event) => {
+      const index = options.indexOf(/** @type {HTMLElement} */ (document.activeElement));
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault();
         const delta = event.key === "ArrowDown" ? 1 : -1;
@@ -152,14 +158,15 @@ window.requestAnimationFrame(() => {
       }
     });
 
-    pickerList.addEventListener("click", (event) => {
-      const option = event.target.closest(".theme-option");
-      if (option) selectOption(option);
+    pickerList.addEventListener("click", (/** @type {MouseEvent} */ event) => {
+      const target = /** @type {Element} */ (event.target);
+      const option = target.closest(".theme-option");
+      if (option) selectOption(/** @type {HTMLElement} */ (option));
     });
 
-    document.addEventListener("click", (event) => {
+    document.addEventListener("click", (/** @type {MouseEvent} */ event) => {
       if (pickerList.hasAttribute("hidden")) return;
-      if (picker.contains(event.target)) return;
+      if (picker.contains(/** @type {Node} */ (event.target))) return;
       closePicker(false);
     });
 
@@ -189,6 +196,11 @@ window.requestAnimationFrame(() => {
   // outside close, and focus returns to the toggle on every close path.
   const panels = [];
 
+  /** @typedef {{ button: HTMLElement, panel: HTMLElement, onOpen?: (() => void) | null }} PanelEntry */
+
+  /**
+   * @param {PanelEntry} entry
+   */
   function openPanel(entry) {
     for (const other of panels) {
       if (other !== entry) closePanel(other, false);
@@ -196,10 +208,16 @@ window.requestAnimationFrame(() => {
     if (entry.onOpen) entry.onOpen();
     entry.panel.removeAttribute("hidden");
     entry.button.setAttribute("aria-expanded", "true");
-    const first = entry.panel.querySelector("button, a, input, select");
+    const first = /** @type {HTMLElement | null} */ (
+      entry.panel.querySelector("button, a, input, select")
+    );
     if (first) first.focus();
   }
 
+  /**
+   * @param {PanelEntry} entry
+   * @param {boolean} returnFocus
+   */
   function closePanel(entry, returnFocus) {
     if (entry.panel.hasAttribute("hidden")) return;
     entry.panel.setAttribute("hidden", "");
@@ -207,9 +225,19 @@ window.requestAnimationFrame(() => {
     if (returnFocus) entry.button.focus();
   }
 
+  /**
+   * @param {Element | null} button
+   * @param {Element | null} panel
+   * @param {(() => void) | null} onOpen
+   * @returns {PanelEntry | null}
+   */
   function registerPanel(button, panel, onOpen) {
     if (!button || !panel) return null;
-    const entry = { button, panel, onOpen };
+    const entry = {
+      button: /** @type {HTMLElement} */ (button),
+      panel: /** @type {HTMLElement} */ (panel),
+      onOpen,
+    };
     panels.push(entry);
     button.addEventListener("click", () => {
       if (panel.hasAttribute("hidden")) openPanel(entry);
@@ -218,15 +246,16 @@ window.requestAnimationFrame(() => {
     return entry;
   }
 
-  document.addEventListener("keydown", (event) => {
+  document.addEventListener("keydown", (/** @type {KeyboardEvent} */ event) => {
     if (event.key !== "Escape") return;
     for (const entry of panels) closePanel(entry, true);
   });
 
-  document.addEventListener("click", (event) => {
+  document.addEventListener("click", (/** @type {MouseEvent} */ event) => {
+    const target = /** @type {Node} */ (event.target);
     for (const entry of panels) {
       if (entry.panel.hasAttribute("hidden")) continue;
-      if (entry.panel.contains(event.target) || entry.button.contains(event.target)) continue;
+      if (entry.panel.contains(target) || entry.button.contains(target)) continue;
       closePanel(entry, false);
     }
   });
@@ -284,8 +313,12 @@ window.requestAnimationFrame(() => {
       ["patterns", ".switch-patterns"],
       ["celebrate", ".switch-celebrate"],
     ];
-    const darkOptions = [...settingsPanel.querySelectorAll("[data-dark-mode]")];
-    const sizeOptions = [...settingsPanel.querySelectorAll("[data-board-size]")];
+    const darkOptions = /** @type {HTMLElement[]} */ ([
+      ...settingsPanel.querySelectorAll("[data-dark-mode]"),
+    ]);
+    const sizeOptions = /** @type {HTMLElement[]} */ ([
+      ...settingsPanel.querySelectorAll("[data-board-size]"),
+    ]);
 
     const syncDarkMode = () => {
       for (const option of darkOptions) {

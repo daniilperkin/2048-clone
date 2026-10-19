@@ -47,7 +47,8 @@ class SoundManager {
   context() {
     if (!this.enabled) return null;
     const Ctor =
-      typeof window !== "undefined" && (window.AudioContext || window.webkitAudioContext);
+      typeof window !== "undefined" &&
+      (window.AudioContext || /** @type {any} */ (window).webkitAudioContext);
     if (!Ctor) return null;
     if (!this.ctx) this.ctx = new Ctor();
     if (this.ctx.state === "suspended" && typeof this.ctx.resume === "function") {

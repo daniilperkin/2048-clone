@@ -8,7 +8,9 @@ class HTMLActuator {
     this.movesContainer = document.querySelector(".moves-container");
     this.timerContainer = document.querySelector(".timer-container");
     this.messageContainer = document.querySelector(".game-message");
-    this.undoButton = document.querySelector(".undo-button");
+    this.undoButton = /** @type {HTMLButtonElement | null} */ (
+      document.querySelector(".undo-button")
+    );
     this.dailyButton = document.querySelector(".daily-button");
     this.shareButton = document.querySelector(".share-button");
     this.celebrationLayer = document.querySelector(".celebration-layer");
@@ -262,7 +264,7 @@ class HTMLActuator {
     const difference = score - this.score;
     this.score = score;
 
-    this.scoreContainer.textContent = this.score;
+    this.scoreContainer.textContent = String(this.score);
 
     if (difference > 0) {
       const addition = document.createElement("div");
@@ -297,8 +299,12 @@ class HTMLActuator {
   // run beat everything before it. Metadata may be missing in older
   // callers (tests, older fixtures) — then the details stay empty.
   renderRunDetails(metadata) {
-    const details = this.messageContainer.querySelector(".run-details");
-    const chip = this.messageContainer.querySelector(".new-best-chip");
+    const details = /** @type {HTMLElement | null} */ (
+      this.messageContainer.querySelector(".run-details")
+    );
+    const chip = /** @type {HTMLElement | null} */ (
+      this.messageContainer.querySelector(".new-best-chip")
+    );
     if (details) {
       if (metadata) {
         const tile = metadata.bestTile ? this.themeManager.getLabel(metadata.bestTile) : "—";
@@ -314,9 +320,13 @@ class HTMLActuator {
 
   clearMessage() {
     this.messageContainer.classList.remove("game-won", "game-over");
-    const details = this.messageContainer.querySelector(".run-details");
+    const details = /** @type {HTMLElement | null} */ (
+      this.messageContainer.querySelector(".run-details")
+    );
     if (details) details.textContent = "";
-    const chip = this.messageContainer.querySelector(".new-best-chip");
+    const chip = /** @type {HTMLElement | null} */ (
+      this.messageContainer.querySelector(".new-best-chip")
+    );
     if (chip) chip.hidden = true;
   }
 }

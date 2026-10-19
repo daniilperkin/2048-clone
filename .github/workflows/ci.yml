@@ -42,6 +42,9 @@ jobs:
       - name: Lint CSS
         run: npm run lint:css
 
+      - name: Type-check the plain-JS sources
+        run: npm run typecheck
+
       - name: Run tests with coverage thresholds
         run: npm run coverage
 

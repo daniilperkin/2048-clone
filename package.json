@@ -17,7 +17,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
-    "verify": "npm run format:check && npm run lint && npm run lint:css && npm test && npm run build"
+    "typecheck": "tsc -p jsconfig.json",
+    "verify": "npm run format:check && npm run lint && npm run lint:css && npm run typecheck && npm test && npm run build"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -30,6 +31,7 @@
     "serve": "^14.2.6",
     "stylelint": "^17.16.0",
     "stylelint-config-recommended": "^18.0.0",
+    "typescript": "^7.0.2",
     "vitest": "^5.0.3",
     "vitest-axe": "^0.1.0"
   },

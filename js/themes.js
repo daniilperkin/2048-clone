@@ -5,6 +5,7 @@
  * Used for overflow tiles: "Principal II", "Principal III", etc.
  */
 function toRoman(num) {
+  /** @type {Array<[string, number]>} */
   const roman = [
     ["m", 1000],
     ["cm", 900],

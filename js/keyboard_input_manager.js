@@ -105,7 +105,7 @@ class KeyboardInputManager {
     let touchStartClientX, touchStartClientY;
     const gameContainer = document.getElementsByClassName("game-container")[0];
 
-    gameContainer.addEventListener(this.eventTouchstart, (event) => {
+    gameContainer.addEventListener(this.eventTouchstart, (/** @type {TouchEvent} */ event) => {
       if (event.touches.length > 1 || event.targetTouches.length > 1) {
         return; // Ignore if touching with more than 1 finger
       }
@@ -116,11 +116,11 @@ class KeyboardInputManager {
       event.preventDefault();
     });
 
-    gameContainer.addEventListener(this.eventTouchmove, (event) => {
+    gameContainer.addEventListener(this.eventTouchmove, (/** @type {TouchEvent} */ event) => {
       event.preventDefault();
     });
 
-    gameContainer.addEventListener(this.eventTouchend, (event) => {
+    gameContainer.addEventListener(this.eventTouchend, (/** @type {TouchEvent} */ event) => {
       if (event.touches.length > 0 || event.targetTouches.length > 0) {
         return; // Ignore if still touching with one or more fingers
       }
