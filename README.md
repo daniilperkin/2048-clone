@@ -19,7 +19,10 @@ This fork modernizes the original game with:
 - **Appearance options** — dark mode, subtle per-theme gradient backgrounds and an opt-in animated ambience layer, all behind one Settings panel; every visual effect is off until you turn it on
 - **Moves counter & timer** — live move count and elapsed play time per game, frozen while an end overlay shows, resumed by "Keep going", and persisted with the save
 - **Optional celebrations** — confetti on a win and a soft glow on a loss, opt-in from Settings
-- **Vitest test suite** — 200+ tests covering game logic, input, rendering, storage, sound, themes, the seeded RNG, the PWA shell, preferences and accessibility; CI enforces coverage thresholds
+- **Board sizes** — 3×3, 4×4 and 5×5 from the Settings panel; every size keeps its own save, best score and records
+- **Local records** — a top-5 leaderboard per mode and a daily-participation streak in the Stats panel
+- **Three-state dark mode** (off / on / auto, following the OS) and an opt-in colour-blind tile-pattern mode
+- **Vitest test suite** — 240+ tests covering game logic, input, rendering, storage, sound, themes, the seeded RNG, the PWA shell, preferences and accessibility; CI enforces coverage thresholds and runs a Chromium smoke test
 - **Namespaced localStorage** — keys are prefixed with `2048-` to avoid collisions on host pages
 
 ## Playing
@@ -40,7 +43,8 @@ The served page is installable as a PWA (browser install button in the address b
 - **U** / **Ctrl+Z** / **Cmd+Z** — undo the last move
 - **Touch swipes** — move tiles on mobile devices
 - **Share** — after a win or a game over, copy the result (score, best tile, emoji board)
-- **Settings** — dark mode, animations, ambience and celebrations toggles (all persisted)
+- **Settings** — dark mode (off / on / auto), board size, animations, ambience, tile patterns and celebrations (all persisted)
+- **Theme picker** — the selector previews each theme's tile colours as swatches
 
 ### Themes
 
@@ -92,27 +96,32 @@ npm install
 
 ### Available scripts
 
-| Script                 | Description                            |
-| ---------------------- | -------------------------------------- |
-| `npm start`            | Generate tile art, then serve on 8080  |
-| `npm run tiles`        | Generate Doodle tile SVGs in `build/`  |
-| `npm run icons`        | Regenerate the PWA icons in `meta/`    |
-| `npm run build`        | Generate the single-file `2048.html`   |
-| `npm run lint`         | Run ESLint                             |
-| `npm run lint:fix`     | Run ESLint with auto-fix               |
-| `npm run format`       | Format all files with Prettier         |
-| `npm run format:check` | Check formatting without writing       |
-| `npm test`             | Run the Vitest test suite              |
-| `npm run coverage`     | Run tests with the coverage thresholds |
+| Script                 | Description                                 |
+| ---------------------- | ------------------------------------------- |
+| `npm start`            | Generate tile art, then serve on 8080       |
+| `npm run tiles`        | Generate Doodle tile SVGs in `build/`       |
+| `npm run icons`        | Regenerate the PWA icons in `meta/`         |
+| `npm run build`        | Generate the single-file `2048.html`        |
+| `npm run lint`         | Run ESLint                                  |
+| `npm run lint:fix`     | Run ESLint with auto-fix                    |
+| `npm run format`       | Format all files with Prettier              |
+| `npm run format:check` | Check formatting without writing            |
+| `npm test`             | Run the Vitest test suite                   |
+| `npm run coverage`     | Run tests with the coverage thresholds      |
+| `npm run typecheck`    | Type-check the plain-JS sources (tsc)       |
+| `npm run test:e2e`     | Run the Playwright browser smoke test       |
+| `npm run verify`       | format + lint + css + types + tests + build |
 
 ### Project structure
 
 ```
 2048-mine/
-├── index.html              # Dev entry — loads 15 separate <script> tags
+├── index.html              # Dev entry — loads 16 separate <script> tags
 ├── manifest.webmanifest    # PWA install metadata
 ├── sw.js                   # Service worker: offline shell (guarded by test/pwa.test.js)
 ├── build-bundle.js         # Single-file bundler (shell extracted from index.html)
+├── jsconfig.json           # tsc checkJs config for the plain-JS sources
+├── playwright.config.js    # Browser smoke suite (test/e2e, port 8090)
 ├── js/                     # Game source (plain scripts, shared global scope)
 │   ├── directions.js       # Shared direction contract (UP/RIGHT/DOWN/LEFT)
 │   ├── themes.js           # ThemeManager + 5 theme definitions
@@ -123,7 +132,8 @@ npm install
 │   ├── local_storage_manager.js
 │   ├── stats.js            # StatsTracker (lifetime stats, undo-aware)
 │   ├── share.js            # ShareResult (emoji-board summary + clipboard)
-│   ├── preferences.js      # Dark mode / motion / ambience / celebration flags
+│   ├── records.js          # Leaderboard (top-5 per mode) + DailyStreak
+│   ├── preferences.js      # Dark mode / motion / ambience / patterns / celebration flags
 │   ├── sound_manager.js    # Opt-in Web Audio merge/win/lose sounds
 │   ├── view_transitions.js # View Transitions API wrapper
 │   ├── html_actuator.js    # DOM renderer
