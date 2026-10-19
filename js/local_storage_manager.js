@@ -33,6 +33,7 @@ class LocalStorageManager {
     // touches the Classic record.
     this.dailyBestKey = "2048-daily-best";
     this.dailyStateKey = "2048-daily-state";
+    this.sizeKey = "2048-size";
 
     const supported = this.localStorageSupported();
     this.storage = supported ? window.localStorage : fakeStorage;
@@ -50,12 +51,13 @@ class LocalStorageManager {
     }
   }
 
-  // Best score getters/setters
+  // Best score getters/setters. Records are per board size: a 3x3 game
+  // must never share a best score with the 4x4 board (see bestKeyFor).
   getBestScore(mode = "classic", date) {
     if (mode === "daily") {
       // Stored as {date, score}; yesterday's record reads as 0.
       try {
-        const rec = JSON.parse(this.storage.getItem(this.dailyBestKey));
+        const rec = JSON.parse(this.storage.getItem(this.bestKeyFor(mode)));
         return rec && rec.date === date ? Number(rec.score) || 0 : 0;
       } catch (_e) {
         return 0;
@@ -63,20 +65,41 @@ class LocalStorageManager {
     }
     // localStorage (and fakeStorage) return strings or null; coerce to
     // a number so callers always get a consistent numeric type.
-    return Number(this.storage.getItem(this.bestScoreKey)) || 0;
+    return Number(this.storage.getItem(this.bestKeyFor(mode))) || 0;
   }
 
   setBestScore(score, mode = "classic", date) {
     if (mode === "daily") {
-      this.storage.setItem(this.dailyBestKey, JSON.stringify({ date, score }));
+      this.storage.setItem(this.bestKeyFor(mode), JSON.stringify({ date, score }));
       return;
     }
-    this.storage.setItem(this.bestScoreKey, score);
+    this.storage.setItem(this.bestKeyFor(mode), score);
   }
 
   // Game state getters/setters and clearing
   stateKeyFor(mode) {
-    return mode === "daily" ? this.dailyStateKey : this.gameStateKey;
+    return (mode === "daily" ? this.dailyStateKey : this.gameStateKey) + this.sizeSuffix();
+  }
+
+  // Board size (3 | 4 | 5). Saves, best scores and daily records are per
+  // size, so a 3x3 game can never load a 4x4 save or share its record.
+  getSize() {
+    const size = Number(this.storage.getItem(this.sizeKey));
+    return [3, 4, 5].includes(size) ? size : 4;
+  }
+
+  setSize(size) {
+    const normalized = [3, 4, 5].includes(Number(size)) ? Number(size) : 4;
+    this.storage.setItem(this.sizeKey, String(normalized));
+  }
+
+  sizeSuffix() {
+    const size = this.getSize();
+    return size === 4 ? "" : `-${size}`;
+  }
+
+  bestKeyFor(mode) {
+    return (mode === "daily" ? this.dailyBestKey : this.bestScoreKey) + this.sizeSuffix();
   }
 
   getGameState(mode) {

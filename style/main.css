@@ -1859,3 +1859,138 @@ body[data-theme="doodle"] .leaderboard li {
   background: rgba(59, 53, 44, 0.08);
   color: #3b352c;
 }
+
+/* ─── Board sizes: 3x3 and 5x5 ──────────────────────────────────
+ * The 4x4 geometry above is the base; these blocks re-derive tile,
+ * cell and position sizes for the other two sizes. All of it stays a
+ * 500px design, so the fluid board scaling keeps working unchanged. */
+
+body[data-size="3"] .grid-cell {
+  width: 146.6667px;
+  height: 146.6667px;
+}
+body[data-size="3"] .tile,
+body[data-size="3"] .tile .tile-inner {
+  width: 146.6667px;
+  height: 146.6667px;
+  line-height: 146.6667px;
+}
+body[data-size="3"] .tile .tile-inner {
+  font-size: calc(var(--tile-font-size, 55px) * 1.3804);
+}
+body[data-size="3"] .tile.tile-position-1-1 {
+  transform: translate(0px, 0px);
+}
+body[data-size="3"] .tile.tile-position-1-2 {
+  transform: translate(0px, 161.6667px);
+}
+body[data-size="3"] .tile.tile-position-1-3 {
+  transform: translate(0px, 323.3333px);
+}
+body[data-size="3"] .tile.tile-position-2-1 {
+  transform: translate(161.6667px, 0px);
+}
+body[data-size="3"] .tile.tile-position-2-2 {
+  transform: translate(161.6667px, 161.6667px);
+}
+body[data-size="3"] .tile.tile-position-2-3 {
+  transform: translate(161.6667px, 323.3333px);
+}
+body[data-size="3"] .tile.tile-position-3-1 {
+  transform: translate(323.3333px, 0px);
+}
+body[data-size="3"] .tile.tile-position-3-2 {
+  transform: translate(323.3333px, 161.6667px);
+}
+body[data-size="3"] .tile.tile-position-3-3 {
+  transform: translate(323.3333px, 323.3333px);
+}
+
+body[data-size="5"] .grid-cell {
+  width: 82px;
+  height: 82px;
+}
+body[data-size="5"] .tile,
+body[data-size="5"] .tile .tile-inner {
+  width: 82px;
+  height: 82px;
+  line-height: 82px;
+}
+body[data-size="5"] .tile .tile-inner {
+  font-size: calc(var(--tile-font-size, 55px) * 0.7718);
+}
+body[data-size="5"] .tile.tile-position-1-1 {
+  transform: translate(0px, 0px);
+}
+body[data-size="5"] .tile.tile-position-1-2 {
+  transform: translate(0px, 97px);
+}
+body[data-size="5"] .tile.tile-position-1-3 {
+  transform: translate(0px, 194px);
+}
+body[data-size="5"] .tile.tile-position-1-4 {
+  transform: translate(0px, 291px);
+}
+body[data-size="5"] .tile.tile-position-1-5 {
+  transform: translate(0px, 388px);
+}
+body[data-size="5"] .tile.tile-position-2-1 {
+  transform: translate(97px, 0px);
+}
+body[data-size="5"] .tile.tile-position-2-2 {
+  transform: translate(97px, 97px);
+}
+body[data-size="5"] .tile.tile-position-2-3 {
+  transform: translate(97px, 194px);
+}
+body[data-size="5"] .tile.tile-position-2-4 {
+  transform: translate(97px, 291px);
+}
+body[data-size="5"] .tile.tile-position-2-5 {
+  transform: translate(97px, 388px);
+}
+body[data-size="5"] .tile.tile-position-3-1 {
+  transform: translate(194px, 0px);
+}
+body[data-size="5"] .tile.tile-position-3-2 {
+  transform: translate(194px, 97px);
+}
+body[data-size="5"] .tile.tile-position-3-3 {
+  transform: translate(194px, 194px);
+}
+body[data-size="5"] .tile.tile-position-3-4 {
+  transform: translate(194px, 291px);
+}
+body[data-size="5"] .tile.tile-position-3-5 {
+  transform: translate(194px, 388px);
+}
+body[data-size="5"] .tile.tile-position-4-1 {
+  transform: translate(291px, 0px);
+}
+body[data-size="5"] .tile.tile-position-4-2 {
+  transform: translate(291px, 97px);
+}
+body[data-size="5"] .tile.tile-position-4-3 {
+  transform: translate(291px, 194px);
+}
+body[data-size="5"] .tile.tile-position-4-4 {
+  transform: translate(291px, 291px);
+}
+body[data-size="5"] .tile.tile-position-4-5 {
+  transform: translate(291px, 388px);
+}
+body[data-size="5"] .tile.tile-position-5-1 {
+  transform: translate(388px, 0px);
+}
+body[data-size="5"] .tile.tile-position-5-2 {
+  transform: translate(388px, 97px);
+}
+body[data-size="5"] .tile.tile-position-5-3 {
+  transform: translate(388px, 194px);
+}
+body[data-size="5"] .tile.tile-position-5-4 {
+  transform: translate(388px, 291px);
+}
+body[data-size="5"] .tile.tile-position-5-5 {
+  transform: translate(388px, 388px);
+}

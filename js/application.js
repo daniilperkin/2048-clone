@@ -1,7 +1,18 @@
 // Wait till the browser is ready to render the game (avoids glitches)
 /* global GameManager, KeyboardInputManager, HTMLActuator, LocalStorageManager, themeManager, soundManager, ViewTransitions, preferences */
 window.requestAnimationFrame(() => {
-  const gameManager = new GameManager(4, KeyboardInputManager, HTMLActuator, LocalStorageManager);
+  // Board size (3 | 4 | 5) comes from storage so every size keeps its own
+  // save, best score and records.
+  const bootStorage = new LocalStorageManager();
+  const boardSize = bootStorage.getSize();
+  buildGridCells(boardSize);
+
+  const gameManager = new GameManager(
+    boardSize,
+    KeyboardInputManager,
+    HTMLActuator,
+    LocalStorageManager
+  );
 
   // Player preferences (dark mode, animations, ambience, celebrations):
   // read the stored flags and mirror them onto the page before anything
@@ -22,6 +33,24 @@ window.requestAnimationFrame(() => {
     };
     fitBoard();
     window.addEventListener("resize", fitBoard);
+  }
+
+  // The board markup ships as 4x4; other sizes rebuild the cell grid with
+  // the same roles, so screen readers always get the full board.
+  function buildGridCells(size) {
+    const gridContainer = document.querySelector(".grid-container");
+    if (!gridContainer) return;
+    const rows = [];
+    for (let y = 0; y < size; y++) {
+      const cells = [];
+      for (let x = 0; x < size; x++) {
+        cells.push('<div class="grid-cell" role="gridcell"></div>');
+      }
+      rows.push(`<div class="grid-row" role="row">${cells.join("")}</div>`);
+    }
+    gridContainer.innerHTML = rows.join("");
+    gridContainer.setAttribute("aria-label", `${size} by ${size} game board`);
+    document.body.dataset.size = String(size);
   }
 
   // Theme picker: a listbox of tile-colour swatches (the native <select>
@@ -256,6 +285,7 @@ window.requestAnimationFrame(() => {
       ["celebrate", ".switch-celebrate"],
     ];
     const darkOptions = [...settingsPanel.querySelectorAll("[data-dark-mode]")];
+    const sizeOptions = [...settingsPanel.querySelectorAll("[data-board-size]")];
 
     const syncDarkMode = () => {
       for (const option of darkOptions) {
@@ -265,17 +295,35 @@ window.requestAnimationFrame(() => {
         );
       }
     };
+    const syncBoardSize = () => {
+      for (const option of sizeOptions) {
+        option.setAttribute(
+          "aria-checked",
+          String(Number(option.dataset.boardSize) === gameManager.size)
+        );
+      }
+    };
     const syncSwitches = () => {
       for (const [name, selector] of toggles) {
         const element = settingsPanel.querySelector(selector);
         if (element) element.setAttribute("aria-checked", String(preferences[name]));
       }
       syncDarkMode();
+      syncBoardSize();
     };
 
     for (const option of darkOptions) {
       option.addEventListener("click", () => {
         preferences.setDarkMode(option.dataset.darkMode);
+        syncSwitches();
+      });
+    }
+    for (const option of sizeOptions) {
+      option.addEventListener("click", () => {
+        const size = Number(option.dataset.boardSize);
+        if (size === gameManager.size) return;
+        buildGridCells(size);
+        gameManager.changeSize(size);
         syncSwitches();
       });
     }

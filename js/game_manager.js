@@ -133,6 +133,12 @@ class GameManager {
   }
 
   applySnapshot(s) {
+    if (s.grid.size !== this.size) {
+      // A save from another board size (hand-edited storage, or a key
+      // that predates the per-size suffixes): treat it as malformed
+      // rather than loading mismatched geometry.
+      throw new Error("save size mismatch");
+    }
     this.grid = new Grid(s.grid.size, s.grid.cells);
     this.score = s.score;
     this.moves = s.moves || 0;
@@ -206,6 +212,20 @@ class GameManager {
     } else {
       this.actuator.actuate(this.grid, metadata);
     }
+  }
+
+  // Switch the board size (3 | 4 | 5). Saves, best scores and records are
+  // per size, so this starts (or resumes) that size's game; the caller
+  // rebuilds the grid cells first (see js/application.js).
+  changeSize(size) {
+    const normalized = [3, 4, 5].includes(Number(size)) ? Number(size) : 4;
+    if (normalized === this.size) return;
+    this.storageManager.setSize(normalized);
+    this.size = normalized;
+    ViewTransitions.run(() => {
+      this.actuator.continueGame();
+      this.setup();
+    });
   }
 
   // Switch between Classic and the Daily Challenge. Each mode keeps its
