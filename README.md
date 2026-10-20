@@ -1,4 +1,4 @@
-# 2048-mine
+# 2048-clone
 
 **Play online:** https://daniilperkin.github.io/2048-clone/ — works on phone and desktop.
 
@@ -24,8 +24,18 @@ This fork modernizes the original game with:
 - **Board sizes** — 3×3, 4×4 and 5×5 from the Settings panel; every size keeps its own save, best score and records
 - **Local records** — a top-5 leaderboard per mode and a daily-participation streak in the Stats panel
 - **Three-state dark mode** (off / on / auto, following the OS) and an opt-in colour-blind tile-pattern mode
-- **Vitest test suite** — 240+ tests covering game logic, input, rendering, storage, sound, themes, the seeded RNG, the PWA shell, preferences and accessibility; CI enforces coverage thresholds and runs a Chromium smoke test
+- **Vitest test suite** — 250+ tests covering game logic, input, rendering, storage, sound, themes, the seeded RNG, the PWA shell, preferences and accessibility; CI enforces coverage thresholds and runs a Chromium smoke test
 - **Namespaced localStorage** — keys are prefixed with `2048-` to avoid collisions on host pages
+
+## Screenshots
+
+| Desktop (Classic)                                       | Dark mode + Settings                                            |
+| ------------------------------------------------------- | --------------------------------------------------------------- |
+| ![Desktop, Classic theme](docs/screenshots/desktop.png) | ![Dark mode with the settings panel](docs/screenshots/dark.png) |
+
+| Theme picker                                 | 5×5 board                                    | Mobile                                        |
+| -------------------------------------------- | -------------------------------------------- | --------------------------------------------- |
+| ![Theme picker](docs/screenshots/themes.png) | ![5x5 board](docs/screenshots/board-5x5.png) | ![Mobile layout](docs/screenshots/mobile.png) |
 
 ## Playing
 
@@ -117,13 +127,19 @@ npm install
 ### Project structure
 
 ```
-2048-mine/
+2048-clone/
 ├── index.html              # Dev entry — loads 16 separate <script> tags
 ├── manifest.webmanifest    # PWA install metadata
 ├── sw.js                   # Service worker: offline shell (guarded by test/pwa.test.js)
 ├── build-bundle.js         # Single-file bundler (shell extracted from index.html)
-├── jsconfig.json           # tsc checkJs config for the plain-JS sources
-├── playwright.config.js    # Browser smoke suite (test/e2e, port 8090)
+├── config/                 # Tool configs (scripts pass explicit --config paths)
+│   ├── eslint.config.js    # ESLint 10 flat config
+│   ├── vitest.config.js    # Vitest + jsdom (root pinned one level up)
+│   ├── playwright.config.js# Browser smoke suite (test/e2e, port 8090)
+│   ├── jsconfig.json       # tsc checkJs config for the plain-JS sources
+│   ├── .prettierrc.json    # Prettier 3
+│   ├── .prettierignore
+│   └── .stylelintrc.json   # stylelint (recommended config)
 ├── js/                     # Game source (plain scripts, shared global scope)
 │   ├── directions.js       # Shared direction contract (UP/RIGHT/DOWN/LEFT)
 │   ├── themes.js           # ThemeManager + 5 theme definitions
@@ -145,7 +161,8 @@ npm install
 ├── test/                   # Vitest + jsdom suite (incl. axe a11y + PWA drift guards)
 ├── tools/                  # generate-tiles.mjs — Doodle SVG art → build/tiles/ (gitignored)
 │                           # make-icons.mjs — PWA icons → meta/icon-*.png (committed)
-└── .github/workflows/      # ci.yml (gate + coverage) and release.yml (tag → Release)
+├── docs/screenshots/       # README screenshots
+└── .github/                # workflows/ (ci.yml gate + release.yml tag → Release) and CONTRIBUTING.md
 ```
 
 ## Credits

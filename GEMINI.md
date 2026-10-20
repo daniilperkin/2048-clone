@@ -1,4 +1,4 @@
-# GEMINI.md — 2048-mine
+# GEMINI.md — 2048-clone
 
 > **Single source of truth: [`AGENTS.md`](./AGENTS.md).**
 > This file is a bridge for Gemini/Antigravity agents. Read `AGENTS.md` for the full project guide.

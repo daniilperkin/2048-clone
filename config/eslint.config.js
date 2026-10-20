@@ -34,7 +34,12 @@ export default [
   {
     // The flat config file itself uses ESM import/export and must be
     // parsed as a module. Listed AFTER the general block so it wins.
-    files: ["eslint.config.js", "build-bundle.js", "vitest.config.js", "playwright.config.js"],
+    files: [
+      "config/eslint.config.js",
+      "build-bundle.js",
+      "config/vitest.config.js",
+      "config/playwright.config.js",
+    ],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",

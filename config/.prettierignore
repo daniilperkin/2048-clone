@@ -10,3 +10,8 @@ meta/
 
 # Coverage report
 coverage/
+
+# Generated tile art (build/) and Playwright artifacts
+build/
+test-results/
+playwright-report/

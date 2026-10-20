@@ -6,7 +6,8 @@ import { defineConfig } from "@playwright/test";
  * this suite exercises the served multi-file build in Chromium.
  */
 export default defineConfig({
-  testDir: "test/e2e",
+  // Paths are relative to this file, which now sits in config/.
+  testDir: "../test/e2e",
   timeout: 45_000,
   fullyParallel: false,
   reporter: process.env.CI ? "line" : "list",
@@ -17,6 +18,7 @@ export default defineConfig({
   },
   webServer: {
     command: "npx serve . -l 8090",
+    cwd: "..",
     url: "http://127.0.0.1:8090",
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,

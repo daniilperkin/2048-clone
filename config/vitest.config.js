@@ -1,6 +1,14 @@
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
 import { defineConfig } from "vitest/config";
 
+const configDir = dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig({
+  // The config lives in config/, so pin the project root one level up (an
+  // absolute path: a bare ".." resolves against process.cwd()) or every
+  // relative glob (test/**, js/**) would resolve outside the repo.
+  root: resolve(configDir, ".."),
   test: {
     environment: "jsdom",
     include: ["test/**/*.test.js"],

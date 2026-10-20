@@ -12,6 +12,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["js/**/*.js"],
-  "exclude": ["node_modules"]
+  "include": ["../js/**/*.js"],
+  "exclude": ["../node_modules"]
 }
