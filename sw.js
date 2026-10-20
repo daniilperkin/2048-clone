@@ -15,7 +15,7 @@
  */
 "use strict";
 
-const CACHE_VERSION = "v4";
+const CACHE_VERSION = "v5";
 const CACHE_NAME = `2048-shell-${CACHE_VERSION}`;
 
 // The boot shell — kept in sync with index.html by test/pwa.test.js.
