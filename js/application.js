@@ -24,26 +24,116 @@ window.requestAnimationFrame(() => {
   // absolute pixels), so narrow screens scale the whole board down as one
   // unit — --board-scale feeds the CSS transform and the frame height.
   const board = document.querySelector(".game-container");
-  if (board) {
-    const fitBoard = () => {
-      const parent = board.parentElement;
-      const available = parent ? parent.clientWidth : 0;
-      if (!available) return; // hidden/headless: keep the design size
-      // Width alone is not enough on phones: the header stack can leave less
-      // vertical room than the scaled board needs, and .board-frame clips
-      // whatever sticks out. Reserve the space the board really has below its
-      // own top edge, using the visual viewport when browser chrome shrinks it.
-      const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
-      const docTop = board.getBoundingClientRect().top + window.scrollY;
-      const heightBudget = vh - docTop - 16;
-      const widthScale = available / 500;
-      const heightScale = heightBudget > 0 ? heightBudget / 500 : widthScale;
-      const scale = Math.max(0.45, Math.min(1, widthScale, heightScale));
-      document.documentElement.style.setProperty("--board-scale", String(scale));
+
+  // Page scale: the desktop layout is ~540x730 CSS px at zoom 1 and the
+  // stylesheet default is zoom 1.25. A fixed zoom overflows any window
+  // shorter than that — which is exactly what happens at 100% browser zoom
+  // on a 768px-tall screen, forcing a scrollbar just to reach the board.
+  // Fit the page instead: never above 1.25 (keeps the comfortable desktop
+  // size), never below MIN_PAGE_ZOOM (past that the text stops being
+  // readable and scrolling is the better trade).
+  const page = document.body;
+  const MAX_PAGE_ZOOM = 1.25;
+  const MIN_PAGE_ZOOM = 0.5;
+
+  function fitPageZoom() {
+    if (!page) return;
+    // Phones fit themselves (fluid container + board scale), so leave the
+    // stylesheet's zoom: 1 in charge there.
+    if (typeof matchMedia !== "undefined" && matchMedia("(max-width: 540px)").matches) {
+      page.style.zoom = "";
+      return;
+    }
+    page.style.zoom = "1"; // measure the natural size, not the fitted one
+    // offsetHeight is the body's own layout height (immune to zoom; a
+    // getBoundingClientRect() read reports the scaled box and drifted the fit
+    // to ~0.99 everywhere). Width is different: a block body stretches to the
+    // viewport, so its offsetWidth says nothing about the content — use the
+    // widest child plus the body's horizontal padding instead.
+    const style = window.getComputedStyle(page);
+    const paddingX = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+    let contentWidth = 0;
+    for (const child of page.children) {
+      // Full-viewport overlays (.ambience, .celebration-layer) are fixed and
+      // would report the viewport width; only in-flow children describe the
+      // page's real content width.
+      const element = /** @type {HTMLElement} */ (child);
+      const childStyle = window.getComputedStyle(element);
+      if (childStyle.position === "fixed" || childStyle.position === "absolute") continue;
+      if (element.offsetWidth > contentWidth) contentWidth = element.offsetWidth;
+    }
+    const naturalHeight = page.scrollHeight || page.offsetHeight;
+    const naturalWidth = contentWidth ? contentWidth + paddingX : page.offsetWidth;
+    if (!naturalHeight || !naturalWidth) {
+      page.style.zoom = ""; // no layout (jsdom/headless): keep the CSS default
+      return;
+    }
+    const viewport = window.visualViewport;
+    const viewportWidth = (viewport && viewport.width) || window.innerWidth;
+    const viewportHeight = (viewport && viewport.height) || window.innerHeight;
+    let scale = Math.max(
+      MIN_PAGE_ZOOM,
+      Math.min(
+        MAX_PAGE_ZOOM,
+        (viewportWidth - 8) / naturalWidth,
+        (viewportHeight - 8) / naturalHeight
+      )
+    );
+    const apply = (value) => {
+      page.style.zoom = String(Math.round(value * 1000) / 1000);
     };
-    fitBoard();
-    window.addEventListener("resize", fitBoard);
+    // Correct against the real scroll box until it fits. Reads happen after
+    // a forced layout, and the loop is repeated on the next frame because a
+    // freshly applied zoom can report the previous layout.
+    const correct = () => {
+      for (let pass = 0; pass < 3; pass += 1) {
+        const scrollHeight = document.documentElement.scrollHeight;
+        const scrollWidth = document.documentElement.scrollWidth;
+        if (scrollHeight <= viewportHeight && scrollWidth <= viewportWidth) return;
+        const fix = Math.min(
+          viewportHeight / Math.max(scrollHeight, 1),
+          viewportWidth / Math.max(scrollWidth, 1)
+        );
+        const next = Math.max(MIN_PAGE_ZOOM, scale * fix * 0.998);
+        if (next >= scale - 0.001) return;
+        scale = next;
+        apply(scale);
+      }
+    };
+    apply(scale);
+    correct();
+    if (typeof requestAnimationFrame === "function") requestAnimationFrame(correct);
   }
+
+  function fitBoard() {
+    if (!board) return;
+    const parent = board.parentElement;
+    const available = parent ? parent.clientWidth : 0;
+    if (!available) return; // hidden/headless: keep the design size
+    // Width alone is not enough on phones: the header stack can leave less
+    // vertical room than the scaled board needs, and .board-frame clips
+    // whatever sticks out. Reserve the space the board really has below its
+    // own top edge, using the visual viewport when browser chrome shrinks it.
+    const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    const docTop = board.getBoundingClientRect().top + window.scrollY;
+    const heightBudget = vh - docTop - 16;
+    const widthScale = available / 500;
+    const heightScale = heightBudget > 0 ? heightBudget / 500 : widthScale;
+    const scale = Math.max(0.45, Math.min(1, widthScale, heightScale));
+    document.documentElement.style.setProperty("--board-scale", String(scale));
+  }
+
+  // Page zoom first: the board measures its own top edge against it. The
+  // load refit matters because fonts, tiles and the hint change the page
+  // height after the first paint.
+  fitPageZoom();
+  fitBoard();
+  const refit = () => {
+    fitPageZoom();
+    fitBoard();
+  };
+  window.addEventListener("resize", refit);
+  window.addEventListener("load", refit);
 
   // The board markup ships as 4x4; other sizes rebuild the cell grid with
   // the same roles, so screen readers always get the full board.

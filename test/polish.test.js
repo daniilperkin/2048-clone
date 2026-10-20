@@ -234,3 +234,84 @@ describe("bootstrap polish (panels, hint, board scaling)", () => {
     expect(document.documentElement.style.getPropertyValue("--board-scale")).toBe("0.5");
   });
 });
+
+describe("page zoom fitting", () => {
+  function mountRealMarkup() {
+    const indexHtml = readFileSync(resolve(process.cwd(), "index.html"), "utf8");
+    document.body.innerHTML = indexHtml
+      .match(/<body>([\s\S]*)<\/body>/)[1]
+      .replace(/<script[\s\S]*?<\/script>/g, "");
+  }
+
+  // jsdom has no layout engine: hand the fitting code a body box and a
+  // viewport so the arithmetic can be exercised.
+  function stubLayout(bodyHeight, bodyWidth, viewportWidth, viewportHeight) {
+    Object.defineProperty(document.body, "offsetHeight", {
+      value: bodyHeight,
+      configurable: true,
+    });
+    Object.defineProperty(document.body, "offsetWidth", {
+      value: bodyWidth,
+      configurable: true,
+    });
+    Object.defineProperty(window, "innerWidth", { value: viewportWidth, configurable: true });
+    Object.defineProperty(window, "innerHeight", { value: viewportHeight, configurable: true });
+  }
+
+  beforeEach(() => {
+    localStorage.clear();
+    document.body.className = "";
+    themeManager.listeners = [];
+    themeManager.set("classic");
+    mountRealMarkup();
+    window.requestAnimationFrame = (fn) => {
+      fn();
+      return 0;
+    };
+  });
+
+  afterEach(() => {
+    Object.defineProperty(document.body, "offsetHeight", { value: 0, configurable: true });
+    Object.defineProperty(document.body, "offsetWidth", { value: 0, configurable: true });
+  });
+
+  it("caps the desktop zoom at 1.25 on a roomy screen", () => {
+    stubLayout(700, 540, 1400, 1000);
+    loadApplication();
+    expect(Number(document.body.style.zoom)).toBe(1.25);
+  });
+
+  it("shrinks the page so a 768px-tall screen needs no scrollbar", () => {
+    stubLayout(700, 540, 1366, 768);
+    loadApplication();
+    const zoom = Number(document.body.style.zoom);
+    expect(zoom).toBeCloseTo((768 - 8) / 700, 3);
+    expect(700 * zoom).toBeLessThanOrEqual(768);
+  });
+
+  it("refits when the window shrinks", () => {
+    stubLayout(700, 540, 1400, 1000);
+    loadApplication();
+    expect(Number(document.body.style.zoom)).toBe(1.25);
+
+    Object.defineProperty(window, "innerHeight", { value: 600, configurable: true });
+    window.dispatchEvent(new Event("resize"));
+
+    expect(Number(document.body.style.zoom)).toBeCloseTo((600 - 8) / 700, 3);
+  });
+
+  it("leaves the mobile layout alone", () => {
+    window.matchMedia = (query) => ({
+      matches: query.includes("max-width"),
+      media: query,
+      addEventListener() {},
+      removeEventListener() {},
+      addListener() {},
+      removeListener() {},
+    });
+    stubLayout(700, 540, 390, 844);
+    loadApplication();
+    expect(document.body.style.zoom).toBe("");
+    delete window.matchMedia;
+  });
+});

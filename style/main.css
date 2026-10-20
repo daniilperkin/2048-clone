@@ -1656,7 +1656,13 @@ body.reduced-motion .board-shake {
   z-index: 300;
   top: calc(100% + 6px);
   left: 0;
-  right: 0;
+  /* The trigger is a narrow flex item. right: 0 used to clamp the list to
+   * the trigger's width, which cut the longer theme names ("Fibonacc",
+   * "Develope"). Size to the content instead and let it grow past the
+   * trigger, bounded so it never leaves the viewport. */
+  width: max-content;
+  min-width: 100%;
+  max-width: min(320px, calc(100vw - 32px));
   margin: 0;
   padding: 6px;
   list-style: none;
@@ -1691,6 +1697,9 @@ body.reduced-motion .board-shake {
 }
 .theme-option-name {
   flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 body.dark .theme-options {
   background: #23232d;
