@@ -55,13 +55,17 @@ class KeyboardInputManager {
     document.addEventListener("keydown", (event) => {
       const modifiers = event.altKey || event.ctrlKey || event.metaKey || event.shiftKey;
       const mapped = keyMap[event.key];
+      const active = document.activeElement;
 
-      // Don't intercept arrow keys while the theme <select> (or any
-      // form control) has focus — the user is navigating the dropdown,
-      // not playing the game.
+      // Don't intercept game keys while a form control, the theme listbox or
+      // an open panel has focus — the player is configuring, not playing.
+      const inWidget = Boolean(
+        active &&
+        typeof active.closest === "function" &&
+        active.closest('[role="listbox"], .settings-panel, .stats-panel')
+      );
       const inFormControl =
-        document.activeElement &&
-        ["SELECT", "INPUT", "TEXTAREA"].includes(document.activeElement.tagName);
+        inWidget || Boolean(active && ["SELECT", "INPUT", "TEXTAREA"].includes(active.tagName));
 
       // Undo: Ctrl/Cmd+Z, or U on its own.
       const isUndo =

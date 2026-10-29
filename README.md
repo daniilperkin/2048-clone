@@ -26,9 +26,9 @@ This fork modernizes the original game with:
 - **Moves counter & timer** — live move count and elapsed play time per game, frozen while an end overlay shows, resumed by "Keep going", and persisted with the save
 - **Optional celebrations** — confetti on a win and a soft glow on a loss, opt-in from Settings
 - **Board sizes** — 3×3, 4×4 and 5×5 from the Settings panel; every size keeps its own save, best score and records
-- **Local records** — a top-5 leaderboard per mode and a daily-participation streak in the Stats panel
+- **Local records** — a top-5 leaderboard per mode and board size, plus a daily-participation streak in the Stats panel
 - **Three-state dark mode** (off / on / auto, following the OS) and an opt-in colour-blind tile-pattern mode
-- **Vitest test suite** — 250+ tests covering game logic, input, rendering, storage, sound, themes, the seeded RNG, the PWA shell, preferences and accessibility; CI enforces coverage thresholds and runs a Chromium smoke test
+- **Vitest test suite** — 260+ tests covering game logic, input, rendering, storage, sound, themes, the seeded RNG, the PWA shell, preferences and accessibility; CI enforces coverage thresholds and runs a Chromium smoke test
 - **Namespaced localStorage** — keys are prefixed with `2048-` to avoid collisions on host pages
 
 ## Screenshots
@@ -60,7 +60,8 @@ The served page is installable as a PWA (browser install button in the address b
 - **Touch swipes** — move tiles on mobile devices
 - **Share** — after a win or a game over, copy the result (score, best tile, emoji board)
 - **Settings** — dark mode (off / on / auto), board size, animations, ambience, tile patterns and celebrations (all persisted)
-- **Theme picker** — the selector previews each theme's tile colours as swatches
+- **Theme picker** — the selector previews each theme's tile colours as swatches; the first visit starts on Agile, and the choice is remembered
+- **Panels** — Stats and Settings close on Escape or a click outside, and focus returns to their toggle
 
 ### Themes
 
@@ -91,8 +92,8 @@ This produces `2048.html` — a standalone file with all JavaScript and CSS inli
 Tag a commit to publish the single-file bundle:
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+git tag v2.1.0
+git push origin v2.1.0
 ```
 
 The Release workflow re-runs the full gate, builds `2048.html` and attaches it to a GitHub Release, so the gitignored bundle stays downloadable without a local build.
@@ -168,6 +169,10 @@ npm install
 ├── docs/screenshots/       # README screenshots
 └── .github/                # workflows/ (ci.yml gate + release.yml tag → Release) and CONTRIBUTING.md
 ```
+
+## Contributing
+
+Bug reports and pull requests are welcome — see [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) for the house rules and the pre-commit checklist (`npm run verify` plus `npm run test:e2e`).
 
 ## Credits
 

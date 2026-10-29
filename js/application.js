@@ -7,18 +7,18 @@ window.requestAnimationFrame(() => {
   const boardSize = bootStorage.getSize();
   buildGridCells(boardSize);
 
+  // Player preferences (dark mode, animations, ambience, celebrations) are
+  // applied before the game renders: a dark-mode player must not see a flash
+  // of the light theme on every reload.
+  preferences.attachStorage(new LocalStorageManager());
+  preferences.apply();
+
   const gameManager = new GameManager(
     boardSize,
     KeyboardInputManager,
     HTMLActuator,
     LocalStorageManager
   );
-
-  // Player preferences (dark mode, animations, ambience, celebrations):
-  // read the stored flags and mirror them onto the page before anything
-  // else renders.
-  preferences.attachStorage(new LocalStorageManager());
-  preferences.apply();
 
   // Fluid board: the grid is a fixed 500px design (tile positions are
   // absolute pixels), so narrow screens scale the whole board down as one
@@ -378,10 +378,14 @@ window.requestAnimationFrame(() => {
       gameManager.dailyStreak.get().count
     );
 
-    // Top-5 runs for the mode currently being played.
+    // Top-5 runs for the mode and board size currently being played.
     const list = statsPanel.querySelector(".leaderboard");
     if (list) {
       list.textContent = "";
+      list.setAttribute(
+        "aria-label",
+        `Best runs · ${gameManager.size}×${gameManager.size} · ${gameManager.mode}`
+      );
       const entries = gameManager.leaderboard.get(gameManager.mode);
       if (entries.length === 0) {
         const empty = document.createElement("li");
@@ -419,6 +423,43 @@ window.requestAnimationFrame(() => {
     const sizeOptions = /** @type {HTMLElement[]} */ ([
       ...settingsPanel.querySelectorAll("[data-board-size]"),
     ]);
+    // The segmented controls are radiogroups: one tab stop per group, arrow
+    // keys move focus between the options. Selection stays on Enter/Space —
+    // arrowing must not start a new game by changing the board size.
+    const radioGroups = [...settingsPanel.querySelectorAll('[role="radiogroup"]')].map((group) => ({
+      group,
+      items: /** @type {HTMLElement[]} */ ([...group.querySelectorAll('[role="radio"]')]),
+    }));
+
+    const syncRadioTabindex = () => {
+      for (const { items } of radioGroups) {
+        const checked = items.findIndex((item) => item.getAttribute("aria-checked") === "true");
+        const stop = checked >= 0 ? checked : 0;
+        items.forEach((item, index) => {
+          item.setAttribute("tabindex", index === stop ? "0" : "-1");
+        });
+      }
+    };
+
+    for (const { group, items } of radioGroups) {
+      group.addEventListener("keydown", (/** @type {KeyboardEvent} */ event) => {
+        const keys = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"];
+        if (!keys.includes(event.key)) return;
+        event.preventDefault();
+        const current = Math.max(
+          0,
+          items.indexOf(/** @type {HTMLElement} */ (document.activeElement))
+        );
+        let next = current;
+        if (event.key === "Home") next = 0;
+        else if (event.key === "End") next = items.length - 1;
+        else {
+          const delta = event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1;
+          next = (current + delta + items.length) % items.length;
+        }
+        items[next].focus();
+      });
+    }
 
     const syncDarkMode = () => {
       for (const option of darkOptions) {
@@ -443,6 +484,7 @@ window.requestAnimationFrame(() => {
       }
       syncDarkMode();
       syncBoardSize();
+      syncRadioTabindex();
     };
 
     for (const option of darkOptions) {

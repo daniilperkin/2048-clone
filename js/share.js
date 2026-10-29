@@ -3,9 +3,10 @@
 /**
  * Builds the copyable result summary and writes it to the clipboard.
  *
- * The board renders as a 4x4 emoji grid so the shape of a run is visible at
- * a glance; shading steps with tile value. Pure text builder + clipboard
- * helper — no DOM state, so both are trivially testable.
+ * The board renders as an emoji grid (one row per row, sized from the
+ * board — 3x3, 4x4 or 5x5) so the shape of a run is visible at a glance;
+ * shading steps with tile value. Pure text builder + clipboard helper — no
+ * DOM state, so both are trivially testable.
  */
 class ShareResult {
   static buildText({ grid, score, mode, date }) {

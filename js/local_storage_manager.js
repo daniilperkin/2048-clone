@@ -200,18 +200,23 @@ class LocalStorageManager {
     }
   }
 
-  // Top-5 runs per mode and the daily-participation streak (see
-  // js/records.js). JSON under the usual namespace; corrupted data reads
-  // as absent instead of crashing.
+  // Top-5 runs per mode and board size, and the daily-participation streak
+  // (see js/records.js). Per size, like the best scores: a 5x5 run scores
+  // far higher than any 4x4 run could and would otherwise crowd the board.
+  // JSON under the usual namespace; corrupted data reads as absent instead
+  // of crashing.
+  leaderboardKeyFor(mode) {
+    return (
+      (mode === "daily" ? "2048-leaderboard-daily" : "2048-leaderboard-classic") + this.sizeSuffix()
+    );
+  }
+
   getLeaderboard(mode) {
-    return this.readJson(mode === "daily" ? "2048-leaderboard-daily" : "2048-leaderboard-classic");
+    return this.readJson(this.leaderboardKeyFor(mode));
   }
 
   setLeaderboard(mode, entries) {
-    this.writeJson(
-      mode === "daily" ? "2048-leaderboard-daily" : "2048-leaderboard-classic",
-      entries
-    );
+    this.writeJson(this.leaderboardKeyFor(mode), entries);
   }
 
   getDailyStreak() {

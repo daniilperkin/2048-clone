@@ -320,6 +320,9 @@ class HTMLActuator {
 
   clearMessage() {
     this.messageContainer.classList.remove("game-won", "game-over");
+    // Drop the assertive live region again: an overlay that is gone should
+    // not keep interrupting the screen reader on later updates.
+    this.messageContainer.removeAttribute("aria-live");
     const details = /** @type {HTMLElement | null} */ (
       this.messageContainer.querySelector(".run-details")
     );
