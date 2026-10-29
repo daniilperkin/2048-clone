@@ -450,7 +450,7 @@ window.requestAnimationFrame(() => {
           0,
           items.indexOf(/** @type {HTMLElement} */ (document.activeElement))
         );
-        let next = current;
+        let next;
         if (event.key === "Home") next = 0;
         else if (event.key === "End") next = items.length - 1;
         else {
