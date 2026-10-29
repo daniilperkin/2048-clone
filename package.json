@@ -1,6 +1,6 @@
 {
   "name": "2048-clone",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A modernized 2048 fork with theme system, accessibility, board sizes, local records, PWA support, single-file bundling, and a Vitest + Playwright suite.",
   "private": true,
   "type": "module",
